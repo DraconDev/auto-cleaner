@@ -92,6 +92,13 @@ function activate(context) {
         await performScan();
         vscode.window.showInformationMessage("Auto Cleaner: Check Output panel for debug logs");
     });
+    const toggleGitCommitCommand = vscode.commands.registerCommand("autoCleaner.toggleGitCommit", async () => {
+        const config = vscode.workspace.getConfiguration("autoCleaner");
+        const currentValue = config.get("createGitCommit", true);
+        await config.update("createGitCommit", !currentValue, vscode.ConfigurationTarget.Global);
+        const newValue = !currentValue;
+        vscode.window.showInformationMessage(`Auto Cleaner: Git auto-commit ${newValue ? "enabled" : "disabled"}`);
+    });
     const cleanCommand = vscode.commands.registerCommand("autoCleaner.clean", async () => {
         await performClean();
     });
@@ -127,6 +134,16 @@ function activate(context) {
                 description: "Generate interactive report",
                 command: "autoCleaner.generateReport",
             },
+            {
+                label: `$(git-commit) Git Auto-Commit: ${configurationManager.isGitCommitEnabled() ? "ON" : "OFF"}`,
+                description: "Toggle automatic git commits before cleaning",
+                command: "autoCleaner.toggleGitCommit",
+            },
+            {
+                label: "$(bug) Show Debug Logs",
+                description: "Open output panel with debug information",
+                command: "autoCleaner.showDebugLogs",
+            },
         ];
         const selection = await vscode.window.showQuickPick(items, {
             placeHolder: "Auto Cleaner Actions",
@@ -156,7 +173,7 @@ function activate(context) {
     const cleanVariablesCommand = vscode.commands.registerCommand("autoCleaner.cleanVariables", async () => {
         await performCleanVariables();
     });
-    context.subscriptions.push(statusBarManager, openSettingsCommand, showMenuCommand, showDebugLogsCommand, scanCommand, cleanCommand, showStatusCommand, generateReportCommand, cleanUnusedFilesCommand, cleanVariablesCommand);
+    context.subscriptions.push(statusBarManager, openSettingsCommand, showMenuCommand, showDebugLogsCommand, toggleGitCommitCommand, scanCommand, cleanCommand, showStatusCommand, generateReportCommand, cleanUnusedFilesCommand, cleanVariablesCommand);
     // Auto-scan on startup if enabled
     if (configurationManager.shouldAutoScanOnSave()) {
         setTimeout(() => performScan(), 2000);

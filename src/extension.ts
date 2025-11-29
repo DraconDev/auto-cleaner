@@ -233,6 +233,7 @@ export function activate(context: vscode.ExtensionContext) {
         openSettingsCommand,
         showMenuCommand,
         showDebugLogsCommand,
+        toggleGitCommitCommand,
         scanCommand,
         cleanCommand,
         showStatusCommand,
