@@ -201,6 +201,7 @@ export function activate(context: vscode.ExtensionContext) {
         statusBarManager,
         openSettingsCommand,
         showMenuCommand,
+        showDebugLogsCommand,
         scanCommand,
         cleanCommand,
         showStatusCommand,

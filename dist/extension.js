@@ -79,6 +79,19 @@ function activate(context) {
     const scanCommand = vscode.commands.registerCommand("autoCleaner.scan", async () => {
         await performScan();
     });
+    const showDebugLogsCommand = vscode.commands.registerCommand("autoCleaner.showDebugLogs", async () => {
+        Logger_1.Logger.show();
+        Logger_1.Logger.log("=== Debug Info ===");
+        Logger_1.Logger.log(`Workspace: ${vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || "None"}`);
+        Logger_1.Logger.log(`Enabled analyzers: ${configurationManager
+            .getEnabledAnalyzers()
+            .join(", ")}`);
+        Logger_1.Logger.log(`Rust enabled: ${configurationManager.isAnalyzerEnabled("rust")}`);
+        Logger_1.Logger.log(`Git commit enabled: ${configurationManager.isGitCommitEnabled()}`);
+        Logger_1.Logger.log("=== Running scan ===");
+        await performScan();
+        vscode.window.showInformationMessage("Auto Cleaner: Check Output panel for debug logs");
+    });
     const cleanCommand = vscode.commands.registerCommand("autoCleaner.clean", async () => {
         await performClean();
     });
@@ -143,7 +156,7 @@ function activate(context) {
     const cleanVariablesCommand = vscode.commands.registerCommand("autoCleaner.cleanVariables", async () => {
         await performCleanVariables();
     });
-    context.subscriptions.push(statusBarManager, openSettingsCommand, showMenuCommand, scanCommand, cleanCommand, showStatusCommand, generateReportCommand, cleanUnusedFilesCommand, cleanVariablesCommand);
+    context.subscriptions.push(statusBarManager, openSettingsCommand, showMenuCommand, showDebugLogsCommand, scanCommand, cleanCommand, showStatusCommand, generateReportCommand, cleanUnusedFilesCommand, cleanVariablesCommand);
     // Auto-scan on startup if enabled
     if (configurationManager.shouldAutoScanOnSave()) {
         setTimeout(() => performScan(), 2000);
