@@ -1,0 +1,297 @@
+{
+    "name": "auto-cleaner",
+    "displayName": "Auto Cleaner",
+    "description": "Automatically cleans unused code across multiple languages (Rust, Go, CSS, TypeScript, and more)",
+    "icon": "thumb.png",
+    "version": "2.4.8",
+    "publisher": "devdrac",
+    "engines": {
+        "vscode": "^1.74.0"
+    },
+    "categories": [
+        "Other",
+        "Extension Packs"
+    ],
+    "keywords": [
+        "clean",
+        "unused",
+        "rust",
+        "go",
+        "css",
+        "optimization",
+        "cleanup"
+    ],
+    "activationEvents": [
+        "onCommand:autoCleaner.openSettings",
+        "onCommand:autoCleaner.scan",
+        "onCommand:autoCleaner.clean",
+        "onStartupFinished"
+    ],
+    "main": "./dist/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "autoCleaner.openSettings",
+                "title": "Auto Cleaner: Open Settings",
+                "category": "Auto Cleaner"
+            },
+            {
+                "command": "autoCleaner.scan",
+                "title": "Auto Cleaner: Scan for Unused Code",
+                "category": "Auto Cleaner"
+            },
+            {
+                "command": "autoCleaner.clean",
+                "title": "Auto Cleaner: Clean Unused Code",
+                "category": "Auto Cleaner"
+            },
+            {
+                "command": "autoCleaner.generateReport",
+                "title": "Auto Cleaner: Generate Report",
+                "category": "Auto Cleaner"
+            },
+            {
+                "command": "autoCleaner.cleanUnusedFiles",
+                "title": "Auto Cleaner: Clean Unused Files",
+                "category": "Auto Cleaner"
+            },
+            {
+                "command": "autoCleaner.cleanVariables",
+                "title": "Auto Cleaner: Clean Unused Variables",
+                "category": "Auto Cleaner"
+            },
+            {
+                "command": "autoCleaner.showMenu",
+                "title": "Auto Cleaner: Show Menu",
+                "category": "Auto Cleaner"
+            }
+        ],
+        "views": {
+            "explorer": [
+                {
+                    "id": "autoCleaner",
+                    "name": "Auto Cleaner"
+                }
+            ]
+        },
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "autoCleaner",
+                    "title": "Auto Cleaner",
+                    "icon": "$(trash)"
+                }
+            ]
+        },
+        "statusBar": {
+            "autoCleaner.status": {
+                "id": "autoCleanerStatus",
+                "name": "Auto Cleaner Status"
+            }
+        },
+        "configuration": [
+            {
+                "title": "Auto Cleaner",
+                "properties": {
+                    "autoCleaner.scanOnSave": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Automatically scan when files are saved"
+                    },
+                    "autoCleaner.scanInterval": {
+                        "type": "number",
+                        "default": 30000,
+                        "description": "How often to scan automatically (in milliseconds)"
+                    },
+                    "autoCleaner.autoClean": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Master switch: Automatically remove unused code without confirmation (overrides granular settings if true)"
+                    },
+                    "autoCleaner.autoCleanImports": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Automatically remove unused imports (Safe)"
+                    },
+                    "autoCleaner.autoCleanFunctions": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Automatically remove unused functions (Use with caution)"
+                    },
+                    "autoCleaner.autoCleanVariables": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Automatically remove unused variables (Use with caution)"
+                    },
+                    "autoCleaner.autoCleanEmptyFiles": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Automatically delete empty files and directories (Use with caution)"
+                    },
+                    "autoCleaner.dryRun": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Preview changes without applying them"
+                    },
+                    "autoCleaner.enabledAnalyzers": {
+                        "type": "array",
+                        "default": [
+                            "css",
+                            "rust",
+                            "go",
+                            "filesystem"
+                        ],
+                        "description": "Which analyzers to enable",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "css",
+                                "rust",
+                                "go",
+                                "typescript",
+                                "javascript",
+                                "python",
+                                "filesystem"
+                            ]
+                        }
+                    },
+                    "autoCleaner.grayAreaHandling": {
+                        "type": "string",
+                        "enum": [
+                            "ignore",
+                            "warn",
+                            "remove"
+                        ],
+                        "default": "warn",
+                        "description": "How to handle gray area items (exported functions, public items, etc.)"
+                    },
+                    "autoCleaner.targetDirectories": {
+                        "type": "array",
+                        "default": [],
+                        "description": "Specific directories to analyze (leave empty to analyze all)",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "autoCleaner.excludePatterns": {
+                        "type": "array",
+                        "default": [
+                            "**/node_modules/**",
+                            "**/target/**",
+                            "**/vendor/**",
+                            "**/.git/**",
+                            "**/dist/**",
+                            "**/build/**"
+                        ],
+                        "description": "Glob patterns for files/folders to exclude from analysis",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "autoCleaner.createGitCommit": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Automatically create a git commit before cleaning to preserve a backup"
+                    },
+                    "autoCleaner.whitelistFiles": {
+                        "type": "array",
+                        "default": [],
+                        "description": "Specific files to NEVER analyze or clean (e.g., 'global.css', 'reset.css', '/path/to/file.js')",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "autoCleaner.whitelistFolders": {
+                        "type": "array",
+                        "default": [],
+                        "description": "Folders to NEVER analyze or clean (e.g., 'vendor', 'generated')",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "autoCleaner.whitelistPatterns": {
+                        "type": "array",
+                        "default": [],
+                        "description": "Glob patterns for files to NEVER analyze or clean (e.g., '**/lib/**/*.css', '**/*.min.js')",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "autoCleaner.analyzers.css.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Enable CSS analyzer"
+                    },
+                    "autoCleaner.analyzers.rust.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Enable Rust analyzer"
+                    },
+                    "autoCleaner.analyzers.go.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Enable Go analyzer"
+                    },
+                    "autoCleaner.analyzers.typescript.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Enable TypeScript analyzer"
+                    },
+                    "autoCleaner.analyzers.javascript.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Enable JavaScript analyzer"
+                    },
+                    "autoCleaner.analyzers.python.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Enable Python analyzer"
+                    },
+                    "autoCleaner.analyzers.filesystem.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Enable file system analyzer (empty files/folders)"
+                    }
+                }
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "build": "npm run compile",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/css-tree": "^2.3.11",
+        "@types/fs-extra": "^11.0.4",
+        "@types/glob": "^8.0.0",
+        "@types/mocha": "^10.0.0",
+        "@types/node": "16.x",
+        "@types/vscode": "^1.74.0",
+        "@typescript-eslint/eslint-plugin": "^5.45.0",
+        "@typescript-eslint/parser": "^5.45.0",
+        "@vscode/test-electron": "^2.2.0",
+        "eslint": "^8.28.0",
+        "glob": "^8.0.3",
+        "mocha": "^10.1.0",
+        "typescript": "^4.9.3"
+    },
+    "dependencies": {
+        "css-tree": "^2.3.1",
+        "fs-extra": "^11.1.0",
+        "glob": "^8.0.3"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/css-clean-pro/css-clean-pro"
+    },
+    "bugs": {
+        "url": "https://github.com/css-clean-pro/css-clean-pro/issues"
+    },
+    "homepage": "https://github.com/css-clean-pro/css-clean-pro#readme"
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"StatusBarManager.d.ts","sourceRoot":"","sources":["../../src/managers/StatusBarManager.ts"],"names":[],"mappings":"AAEA,qBAAa,gBAAgB;IACzB,OAAO,CAAC,aAAa,CAAuB;;IAa5C,YAAY,CAAC,IAAI,EAAE,MAAM,EAAE,IAAI,GAAE,MAAmB;IAKpD,eAAe,CAAC,KAAK,EAAE,MAAM;IAQ7B,OAAO;CAGV"}
