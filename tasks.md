@@ -4,9 +4,10 @@
   - we are still not recognizing rust, i do have a lot of unused imports 
 - gitignore support is good later 
 - btw there would be good to have a deeper breakdown in general settings so function like what kind?  unexported, exported but unused? export and used is a safe keep for sure, similar can be said for variables
+- make a git commit before cleaning in every setting unless turned off, but it should be on by default 
+  - we didn'tdo a git commit before cleaning, in fact cleaning didn't anything seemingly, and we are still not recognizing rust
 
 # Check
-- make a git commit before cleaning in every setting unless turned off, but it should be on by default 
 
 # Done 
 
