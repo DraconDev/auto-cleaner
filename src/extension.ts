@@ -103,6 +103,25 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
+    const toggleGitCommitCommand = vscode.commands.registerCommand(
+        "autoCleaner.toggleGitCommit",
+        async () => {
+            const config = vscode.workspace.getConfiguration("autoCleaner");
+            const currentValue = config.get<boolean>("createGitCommit", true);
+            await config.update(
+                "createGitCommit",
+                !currentValue,
+                vscode.ConfigurationTarget.Global
+            );
+            const newValue = !currentValue;
+            vscode.window.showInformationMessage(
+                `Auto Cleaner: Git auto-commit ${
+                    newValue ? "enabled" : "disabled"
+                }`
+            );
+        }
+    );
+
     const cleanCommand = vscode.commands.registerCommand(
         "autoCleaner.clean",
         async () => {
@@ -143,6 +162,18 @@ export function activate(context: vscode.ExtensionContext) {
                     label: "$(file-text) Report",
                     description: "Generate interactive report",
                     command: "autoCleaner.generateReport",
+                },
+                {
+                    label: `$(git-commit) Git Auto-Commit: ${
+                        configurationManager.isGitCommitEnabled() ? "ON" : "OFF"
+                    }`,
+                    description: "Toggle automatic git commits before cleaning",
+                    command: "autoCleaner.toggleGitCommit",
+                },
+                {
+                    label: "$(bug) Show Debug Logs",
+                    description: "Open output panel with debug information",
+                    command: "autoCleaner.showDebugLogs",
                 },
             ];
 
