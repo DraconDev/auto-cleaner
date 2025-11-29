@@ -72,6 +72,37 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
+    const showDebugLogsCommand = vscode.commands.registerCommand(
+        "autoCleaner.showDebugLogs",
+        async () => {
+            Logger.show();
+            Logger.log("=== Debug Info ===");
+            Logger.log(
+                `Workspace: ${
+                    vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || "None"
+                }`
+            );
+            Logger.log(
+                `Enabled analyzers: ${configurationManager
+                    .getEnabledAnalyzers()
+                    .join(", ")}`
+            );
+            Logger.log(
+                `Rust enabled: ${configurationManager.isAnalyzerEnabled(
+                    "rust"
+                )}`
+            );
+            Logger.log(
+                `Git commit enabled: ${configurationManager.isGitCommitEnabled()}`
+            );
+            Logger.log("=== Running scan ===");
+            await performScan();
+            vscode.window.showInformationMessage(
+                "Auto Cleaner: Check Output panel for debug logs"
+            );
+        }
+    );
+
     const cleanCommand = vscode.commands.registerCommand(
         "autoCleaner.clean",
         async () => {
