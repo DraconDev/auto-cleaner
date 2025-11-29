@@ -98,6 +98,9 @@ class RustAnalyzer {
                         .split("\n")
                         .filter((l) => l.trim());
                     Logger_1.Logger.log(`[RustAnalyzer] 'cargo check' returned ${lines.length} lines of output`);
+                    let warningCount = 0;
+                    let unusedImportCount = 0;
+                    const warningCodes = new Set();
                     for (const line of lines) {
                         if (!line.trim())
                             continue;
@@ -105,9 +108,14 @@ class RustAnalyzer {
                             const msg = JSON.parse(line);
                             // Filter for compiler warnings
                             if (msg.message && msg.level === "warning") {
+                                warningCount++;
                                 const code = msg.message.code?.code;
+                                if (code) {
+                                    warningCodes.add(code);
+                                }
                                 // Focus on unused imports
                                 if (code === "unused_imports") {
+                                    unusedImportCount++;
                                     const span = msg.message.spans.find((s) => s.is_primary);
                                     if (span) {
                                         const absPath = path.isAbsolute(span.file_name)
@@ -137,6 +145,15 @@ class RustAnalyzer {
                             // Skip non-JSON lines
                             continue;
                         }
+                    }
+                    Logger_1.Logger.log(`[RustAnalyzer] Found ${warningCount} total warnings`);
+                    Logger_1.Logger.log(`[RustAnalyzer] Found ${unusedImportCount} unused import warnings`);
+                    if (warningCodes.size > 0) {
+                        Logger_1.Logger.log(`[RustAnalyzer] Warning codes: ${Array.from(warningCodes).join(", ")}`);
+                    }
+                    else {
+                        Logger_1.Logger.log(`[RustAnalyzer] No warning codes found. Your project may need rustc flags for unused checks.`);
+                        Logger_1.Logger.log(`[RustAnalyzer] Suggestion: Add to Cargo.toml: [lints.rust] unused_imports = "warn"`);
                     }
                 }
                 catch (err) {

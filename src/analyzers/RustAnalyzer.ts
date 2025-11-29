@@ -128,6 +128,10 @@ export class RustAnalyzer implements IAnalyzer {
                         `[RustAnalyzer] 'cargo check' returned ${lines.length} lines of output`
                     );
 
+                    let warningCount = 0;
+                    let unusedImportCount = 0;
+                    const warningCodes = new Set<string>();
+
                     for (const line of lines) {
                         if (!line.trim()) continue;
 
@@ -136,10 +140,15 @@ export class RustAnalyzer implements IAnalyzer {
 
                             // Filter for compiler warnings
                             if (msg.message && msg.level === "warning") {
+                                warningCount++;
                                 const code = msg.message.code?.code;
+                                if (code) {
+                                    warningCodes.add(code);
+                                }
 
                                 // Focus on unused imports
                                 if (code === "unused_imports") {
+                                    unusedImportCount++;
                                     const span = msg.message.spans.find(
                                         (s) => s.is_primary
                                     );
@@ -173,6 +182,27 @@ export class RustAnalyzer implements IAnalyzer {
                             // Skip non-JSON lines
                             continue;
                         }
+                    }
+
+                    Logger.log(
+                        `[RustAnalyzer] Found ${warningCount} total warnings`
+                    );
+                    Logger.log(
+                        `[RustAnalyzer] Found ${unusedImportCount} unused import warnings`
+                    );
+                    if (warningCodes.size > 0) {
+                        Logger.log(
+                            `[RustAnalyzer] Warning codes: ${Array.from(
+                                warningCodes
+                            ).join(", ")}`
+                        );
+                    } else {
+                        Logger.log(
+                            `[RustAnalyzer] No warning codes found. Your project may need rustc flags for unused checks.`
+                        );
+                        Logger.log(
+                            `[RustAnalyzer] Suggestion: Add to Cargo.toml: [lints.rust] unused_imports = "warn"`
+                        );
                     }
                 } catch (err: any) {
                     Logger.error(
