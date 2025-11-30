@@ -2,12 +2,13 @@
 
 -   btw there would be good to have a deeper breakdown in general settings so function like what kind? unexported, exported but unused? export and used is a safe keep for sure, similar can be said for variables
   -   this is in the general setting we should have a way to select which kind of function to keep
+-   use ; bug
+    -   when we have only one import on the line we should remove the line
+    -   this is still not fixed
 
 
 # Check
 
--   use ; bug
-    -   when we have only one import on the line we should remove the line
 
 # Done
 
