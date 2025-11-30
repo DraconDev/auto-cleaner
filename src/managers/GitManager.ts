@@ -54,6 +54,21 @@ export class GitManager {
         }
     }
 
+    public async pushChanges(cwd: string): Promise<boolean> {
+        try {
+            Logger.log(`[GitManager] Pushing changes in ${cwd}`);
+            await this.runCommand("git push", cwd);
+            Logger.log("[GitManager] Push successful.");
+            return true;
+        } catch (error) {
+            Logger.error("[GitManager] Push failed", error);
+            vscode.window.showErrorMessage(
+                `Auto Cleaner: Failed to push changes. Check Output channel.`
+            );
+            return false;
+        }
+    }
+
     private async runCommand(command: string, cwd: string): Promise<string> {
         return new Promise((resolve, reject) => {
             cp.exec(
