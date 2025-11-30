@@ -165,7 +165,13 @@ class RustAnalyzer {
                 }
                 catch (err) {
                     Logger_1.Logger.error(`[RustAnalyzer] Cargo check failed in ${cwd}`, err);
-                    vscode.window.showErrorMessage(`Auto Cleaner: Cargo check failed in ${cwd}. Is cargo installed? Check Output channel.`);
+                    if (err.stderr) {
+                        Logger_1.Logger.error(`[RustAnalyzer] Stderr: ${err.stderr}`);
+                    }
+                    if (err.stdout) {
+                        Logger_1.Logger.log(`[RustAnalyzer] Stdout (partial): ${err.stdout.substring(0, 200)}...`);
+                    }
+                    vscode.window.showErrorMessage(`Auto Cleaner: Cargo check failed. Check 'Auto Cleaner' output channel for details.`);
                     // Continue to next project root if any
                 }
             }

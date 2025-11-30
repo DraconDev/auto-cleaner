@@ -220,8 +220,21 @@ export class RustAnalyzer implements IAnalyzer {
                         `[RustAnalyzer] Cargo check failed in ${cwd}`,
                         err
                     );
+
+                    if (err.stderr) {
+                        Logger.error(`[RustAnalyzer] Stderr: ${err.stderr}`);
+                    }
+                    if (err.stdout) {
+                        Logger.log(
+                            `[RustAnalyzer] Stdout (partial): ${err.stdout.substring(
+                                0,
+                                200
+                            )}...`
+                        );
+                    }
+
                     vscode.window.showErrorMessage(
-                        `Auto Cleaner: Cargo check failed in ${cwd}. Is cargo installed? Check Output channel.`
+                        `Auto Cleaner: Cargo check failed. Check 'Auto Cleaner' output channel for details.`
                     );
                     // Continue to next project root if any
                 }
