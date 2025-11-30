@@ -6,7 +6,7 @@
    - ```use crate::components::{Civilian, Enemy, Player, Police, SoulValue, Velocity};
         use crate::plugins::core::AppState;
         use crate::resources::{Director, ObjectPool, TimeManager};```
-   - so if any 
+   - so if needlessly imported then simply the line is deleted instead of the import
 
 # Check
 
