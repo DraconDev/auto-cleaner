@@ -57,6 +57,11 @@ export interface CleanableItem {
     suggestion?: string; // What to do about it
     isGrayArea: boolean; // Exported functions, etc.
 
+    // Granular filtering metadata
+    isExported?: boolean; // Is this item exported (pub, export, etc.)?
+    isUsedInternally?: boolean; // Is it used within the same module/file?
+    isUsedExternally?: boolean; // Is it used by other modules/packages?
+
     // Analyzer specific data
     data?: any;
 }
