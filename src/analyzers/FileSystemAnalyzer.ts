@@ -65,7 +65,9 @@ export class FileSystemAnalyzer implements IAnalyzer {
             });
 
             for (const entry of entries) {
-                const fullPath = path.join(currentPath, entry.name);
+                const fullPath = path
+                    .join(currentPath, entry.name)
+                    .replace(/\\/g, "/");
 
                 // Check exclusions and whitelist
                 if (

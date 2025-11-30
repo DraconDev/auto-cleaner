@@ -69,7 +69,9 @@ class FileSystemAnalyzer {
                 withFileTypes: true,
             });
             for (const entry of entries) {
-                const fullPath = path.join(currentPath, entry.name);
+                const fullPath = path
+                    .join(currentPath, entry.name)
+                    .replace(/\\/g, "/");
                 // Check exclusions and whitelist
                 if (this.configManager.isExcluded(fullPath, rootPath) ||
                     this.configManager.isWhitelisted(fullPath, rootPath)) {
