@@ -418,68 +418,122 @@ async function performScan() {
 
 async function performClean() {
     try {
-        const config = vscode.workspace.getConfiguration("autoCleaner");
-        const autoClean = config.get<boolean>("autoClean", false);
+        // Git commit before cleaning
+        const commitSuccess = await createBackupCommit();
+        if (!commitSuccess) {
+            Logger.log("[Extension] User cancelled or git commit failed");
+            return;
+        }
 
-        if (!autoClean) {
-            const action = await vscode.window.showWarningMessage(
-                "This will remove unused CSS rules. This action cannot be undone via this command (use Ctrl+Z after).",
-                { modal: true },
-                "Remove",
-                "Cancel"
-            );
+        const action = await vscode.window.showWarningMessage(
+            "This will remove all detected unused code across all languages. Use Ctrl+Z to undo.",
+            { modal: true },
+            "Clean All",
+            "Cancel"
+        );
 
-            if (action !== "Remove") {
-                return;
-            }
+        if (action !== "Clean All") {
+            return;
         }
 
         statusBarManager.updateStatus("Cleaning...", "$(trash)");
-
         await performScan();
 
-        const cssResult = lastAnalysisResults.find(
-            (r) => r.analyzerName === "css"
-        );
-        if (!cssResult) {
+        // Aggregate all cleanable items from all analyzers
+        const allItems: CleanableItem[] = [];
+        for (const result of lastAnalysisResults) {
+            allItems.push(...result.items);
+        }
+
+        if (allItems.length === 0) {
             vscode.window.showInformationMessage(
-                "Auto Cleaner: No CSS issues found"
+                "Auto Cleaner: No unused code found"
             );
             statusBarManager.updateStatus("Ready", "$(check)");
             return;
         }
 
-        const cleanableItems = cssResult.items.filter(
-            (i) => i.type === "unused-rule"
-        );
-
-        if (cleanableItems.length === 0) {
-            vscode.window.showInformationMessage(
-                "Auto Cleaner: No unused CSS rules found"
-            );
-            statusBarManager.updateStatus("Ready", "$(check)");
-            return;
+        // Group items by analyzer name
+        const itemsByAnalyzer = new Map<string, CleanableItem[]>();
+        for (const result of lastAnalysisResults) {
+            if (result.items.length > 0) {
+                itemsByAnalyzer.set(result.analyzerName, result.items);
+            }
         }
 
-        const cleanResult = await cssAnalyzer.clean(cleanableItems);
+        // Clean each analyzer's items
+        let totalCleaned = 0;
+        const errors: string[] = [];
+
+        for (const [analyzerName, items] of itemsByAnalyzer) {
+            const analyzer = getAnalyzer(analyzerName);
+            if (analyzer) {
+                try {
+                    const result = await analyzer.clean(items);
+                    totalCleaned += result.itemsCleaned;
+                    if (result.errors.length > 0) {
+                        errors.push(
+                            ...result.errors.map(
+                                (e) => `${analyzerName}: ${e.error}`
+                            )
+                        );
+                    }
+                } catch (error: any) {
+                    Logger.error(
+                        `[Extension] Error cleaning ${analyzerName}`,
+                        error
+                    );
+                    errors.push(`${analyzerName}: ${error.message}`);
+                }
+            }
+        }
 
         // Refresh
         await performScan();
 
         statusBarManager.updateStatus(
-            `Cleaned ${cleanResult.itemsCleaned} rules`,
+            `Cleaned ${totalCleaned} items`,
             "$(check)"
         );
 
-        vscode.window.showInformationMessage(
-            `Auto Cleaner: Successfully removed ${cleanResult.itemsCleaned} unused rules`
-        );
+        if (errors.length > 0) {
+            vscode.window.showWarningMessage(
+                `Auto Cleaner: Removed ${totalCleaned} items with ${errors.length} errors. Check output.`
+            );
+            Logger.error("[Extension] Clean errors:", errors);
+        } else {
+            vscode.window.showInformationMessage(
+                `Auto Cleaner: Successfully removed ${totalCleaned} unused items`
+            );
+        }
     } catch (error) {
-        console.error("Error during CSS clean:", error);
+        console.error("Error during clean:", error);
+        Logger.error("[Extension] Fatal error during clean", error);
         statusBarManager.updateStatus("Clean Error", "$(error)");
         vscode.window.showErrorMessage(
             "Auto Cleaner: Error during cleaning - check output panel for details"
         );
+    }
+}
+
+function getAnalyzer(name: string): any {
+    switch (name) {
+        case "css":
+            return cssAnalyzer;
+        case "rust":
+            return rustAnalyzer;
+        case "go":
+            return goAnalyzer;
+        case "typescript":
+            return tsAnalyzer;
+        case "javascript":
+            return jsAnalyzer;
+        case "python":
+            return pyAnalyzer;
+        case "filesystem":
+            return fsAnalyzer;
+        default:
+            return null;
     }
 }
 
