@@ -48,6 +48,42 @@ export class RustAnalyzer implements IAnalyzer {
         return this.configManager.isAnalyzerEnabled("rust");
     }
 
+    async analyzeExportStatus(
+        filePath: string,
+        line: number,
+        itemName: string
+    ): Promise<{ isExported: boolean; isUsedInternally: boolean }> {
+        try {
+            const content = await fs.readFile(filePath, "utf-8");
+            const lines = content.split("\n");
+            const itemLine = lines[line - 1] || "";
+
+            // Check for 'pub' keyword
+            // Matches: pub fn, pub struct, pub enum, pub const, pub static, pub type, pub trait, pub mod
+            // Also handles pub(crate), pub(super) which are technically exported from the module but restricted
+            const isExported =
+                /\bpub(\([^)]+\))?\s+(fn|struct|enum|trait|const|static|type|mod)\s+/.test(
+                    itemLine
+                );
+
+            // Check internal usage (simple grep for the item name)
+            // We count occurrences. Definition is 1. Usage > 1.
+            // This is a heuristic and might have false positives (comments, strings)
+            // but is safer than deleting potentially used code.
+            const occurrences = content.split(itemName).length - 1;
+            const isUsedInternally = occurrences > 1;
+
+            return { isExported, isUsedInternally };
+        } catch (error) {
+            Logger.error(
+                `[RustAnalyzer] Error analyzing export status for ${itemName} in ${filePath}`,
+                error
+            );
+            // Fail safe: assume it might be exported and used
+            return { isExported: true, isUsedInternally: true };
+        }
+    }
+
     async scan(workspace: vscode.WorkspaceFolder): Promise<AnalysisResult> {
         const items: CleanableItem[] = [];
         let totalFiles = 0;
