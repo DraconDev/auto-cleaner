@@ -1,18 +1,13 @@
 # Do
 
+# Done
+
 -   btw there would be good to have a deeper breakdown in general settings so function like what kind? unexported, exported but unused? export and used is a safe keep for sure, similar can be said for variables
   -   this is in the general setting we should have a way to select which kind of function to keep
   -   ? not updated
-
-
-# Check
-
 -   use ; bug
     -   when we have only one import on the line we should remove the line
     -   this is still not fixed
-
-# Done
-
 -   then i right click on the status bar many options still only talk of css, which reflects the old version 
 -   we should not only git commit but push before cleaning
 -   when run a clean we seem to delete the line that is needlessly instead of the unused import so
