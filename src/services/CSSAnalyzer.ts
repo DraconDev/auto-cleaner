@@ -372,9 +372,13 @@ export class CSSAnalyzer implements IAnalyzer {
         const files: vscode.Uri[] = [];
         const pattern = `**/*.{${extensions.join(",")}}`;
 
+        // Use configured exclusion patterns
+        const excludePatterns = this.configManager.getExcludePatterns();
+        const excludePattern = `{${excludePatterns.join(",")}}`;
+
         const foundFiles = await vscode.workspace.findFiles(
             new vscode.RelativePattern(uri, pattern),
-            "**/node_modules/**",
+            excludePattern,
             10000
         );
 

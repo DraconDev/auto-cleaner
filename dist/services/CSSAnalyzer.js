@@ -320,7 +320,10 @@ class CSSAnalyzer {
     async findFilesByExtensions(uri, extensions) {
         const files = [];
         const pattern = `**/*.{${extensions.join(",")}}`;
-        const foundFiles = await vscode.workspace.findFiles(new vscode.RelativePattern(uri, pattern), "**/node_modules/**", 10000);
+        // Use configured exclusion patterns
+        const excludePatterns = this.configManager.getExcludePatterns();
+        const excludePattern = `{${excludePatterns.join(",")}}`;
+        const foundFiles = await vscode.workspace.findFiles(new vscode.RelativePattern(uri, pattern), excludePattern, 10000);
         files.push(...foundFiles);
         return files;
     }
