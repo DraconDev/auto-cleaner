@@ -1,7 +1,7 @@
 # Do
 
 -   btw there would be good to have a deeper breakdown in general settings so function like what kind? unexported, exported but unused? export and used is a safe keep for sure, similar can be said for variables
--   we need to update the clean commands they are still from the time we only did css
+-   then i right click on the status bar many options still only talk of css, which reflects the old version
 -   use ;
     -   when we have only one on the line we should remove the line
 
