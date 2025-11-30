@@ -336,13 +336,17 @@ export class RustAnalyzer implements IAnalyzer {
                         const hasCodeAfter =
                             textAfter.length > 0 &&
                             textAfter !== "," &&
-                            textAfter !== "}";
+                            textAfter !== "}" &&
+                            textAfter !== ";";
 
-                        // Special case: if the line is just "    UserId," or "    UserId" -> Delete whole line
+                        // Special case: if the line is just "    UserId," or "    UserId;" or "    UserId" -> Delete whole line
                         // But if it is "    AuthenticatedUser, UserId," -> Only delete UserId
 
                         const isAloneOnLine =
-                            !hasCodeBefore && (!textAfter || textAfter === ",");
+                            !hasCodeBefore &&
+                            (!textAfter ||
+                                textAfter === "," ||
+                                textAfter === ";");
 
                         if (!isAloneOnLine || fullText.includes("{")) {
                             // Smart deletion for partial items

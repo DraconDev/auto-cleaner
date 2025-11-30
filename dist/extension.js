@@ -111,22 +111,22 @@ function activate(context) {
             },
             {
                 label: "$(search) Scan",
-                description: "Scan for unused code",
+                description: "Scan for unused code across all languages",
                 command: "autoCleaner.scan",
             },
             {
-                label: "$(trash) Clean Unused Rules",
-                description: "Remove unused CSS rules",
+                label: "$(trash) Clean All Unused Code",
+                description: "Remove all detected unused code",
                 command: "autoCleaner.clean",
             },
             {
                 label: "$(file-code) Clean Unused Variables",
-                description: "Remove unused CSS variables",
+                description: "Remove unused variables",
                 command: "autoCleaner.cleanVariables",
             },
             {
                 label: "$(file-media) Clean Unused Files",
-                description: "Delete unused CSS files",
+                description: "Delete unused files",
                 command: "autoCleaner.cleanUnusedFiles",
             },
             {

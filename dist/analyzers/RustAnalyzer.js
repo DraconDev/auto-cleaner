@@ -246,10 +246,14 @@ class RustAnalyzer {
                         const hasCodeBefore = textBefore.length > 0 && textBefore !== "{";
                         const hasCodeAfter = textAfter.length > 0 &&
                             textAfter !== "," &&
-                            textAfter !== "}";
-                        // Special case: if the line is just "    UserId," or "    UserId" -> Delete whole line
+                            textAfter !== "}" &&
+                            textAfter !== ";";
+                        // Special case: if the line is just "    UserId," or "    UserId;" or "    UserId" -> Delete whole line
                         // But if it is "    AuthenticatedUser, UserId," -> Only delete UserId
-                        const isAloneOnLine = !hasCodeBefore && (!textAfter || textAfter === ",");
+                        const isAloneOnLine = !hasCodeBefore &&
+                            (!textAfter ||
+                                textAfter === "," ||
+                                textAfter === ";");
                         if (!isAloneOnLine || fullText.includes("{")) {
                             // Smart deletion for partial items
                             let deleteRange = new vscode.Range(new vscode.Position(startLine, startCol), new vscode.Position(endLine, endCol));
