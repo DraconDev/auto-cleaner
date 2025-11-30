@@ -9,14 +9,10 @@
    - so if needlessly imported then simply the line is deleted instead of the import
 - we should only git commit but push before cleaning
 
-# Check
-
 # Done 
 
 - make a git commit before cleaning in every setting unless turned off, but it should be on by default 
   - we didn'tdo a git commit before cleaning, in fact cleaning didn't anything seemingly, and we are still not recognizing rust
-
-
 - gitignore support is good later 
 - then i see the report that rust is not even considered, i am in a rust project and apparently there is nothing to filter from rust, and i do have a lot of unused imports 
   - we are still not recognizing rust, i do have a lot of unused imports 
