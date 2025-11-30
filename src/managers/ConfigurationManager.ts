@@ -90,6 +90,10 @@ export class ConfigurationManager {
         return this.getConfiguration().get<boolean>("createGitCommit", true);
     }
 
+    isGitPushEnabled(): boolean {
+        return this.getConfiguration().get<boolean>("pushGitCommit", false);
+    }
+
     isDryRun(): boolean {
         return this.getConfiguration().get<boolean>("dryRun", true);
     }

@@ -3,7 +3,7 @@
   "displayName": "Auto Cleaner",
   "description": "Automatically cleans unused code across multiple languages (Rust, Go, CSS, TypeScript, and more)",
   "icon": "thumb.png",
-  "version": "2.6.21",
+  "version": "2.6.22",
   "publisher": "devdrac",
   "engines": {
     "vscode": "^1.74.0"
@@ -192,6 +192,11 @@
             "type": "boolean",
             "default": true,
             "description": "Automatically create a git commit before cleaning to preserve a backup"
+          },
+          "autoCleaner.pushGitCommit": {
+            "type": "boolean",
+            "default": false,
+            "description": "Automatically push the backup commit to the remote repository"
           },
           "autoCleaner.whitelistFiles": {
             "type": "array",
