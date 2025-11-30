@@ -12,6 +12,7 @@ export declare class TSAnalyzer implements IAnalyzer {
     scan(workspace: vscode.WorkspaceFolder): Promise<AnalysisResult>;
     clean(items: CleanableItem[]): Promise<CleanResult>;
     private runCommand;
+    private analyzeExportStatus;
     private parseTSOutput;
     private removeUnusedImport;
     private removeUnusedVariable;

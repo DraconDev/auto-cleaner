@@ -174,10 +174,44 @@ export class JavaScriptAnalyzer implements IAnalyzer {
         });
     }
 
-    private parseESLintOutput(
+    private async analyzeExportStatus(
+        filePath: string,
+        line: number,
+        itemName: string
+    ): Promise<{ isExported: boolean; isUsedInternally: boolean }> {
+        try {
+            const content = await fs.readFile(filePath, "utf-8");
+            const lines = content.split("\n");
+            const itemLine = lines[line - 1] || "";
+
+            // Check for 'export' keyword or module.exports
+            // Matches: export const, export function, export default, module.exports, exports.foo
+            const isExported =
+                /\bexport\s+(const|function|class|default|var|let)\s+/.test(
+                    itemLine
+                ) ||
+                /\b(module\.)?exports\s*(\.|\[|=)/.test(itemLine) ||
+                /\bexport\s*{\s*\w+/.test(content);
+
+            // Check internal usage (simple grep for the item name)
+            // We count occurrences. Definition is 1. Usage > 1.
+            const occurrences = content.split(itemName).length - 1;
+            const isUsedInternally = occurrences > 1;
+
+            return { isExported, isUsedInternally };
+        } catch (error) {
+            console.error(
+                `Error analyzing export status for ${itemName} in ${filePath}:`,
+                error
+            );
+            return { isExported: true, isUsedInternally: true };
+        }
+    }
+
+    private async parseESLintOutput(
         output: string,
         workspacePath: string
-    ): CleanableItem[] {
+    ): Promise<CleanableItem[]> {
         const items: CleanableItem[] = [];
         const lines = output.split("\n");
 
@@ -200,6 +234,50 @@ export class JavaScriptAnalyzer implements IAnalyzer {
                         type = "unused-import";
                     }
 
+                    // Extract item name from message
+                    // Message format: "'foo' is defined but never used."
+                    const nameMatch = message.match(/'([^']+)'/);
+                    const itemName = nameMatch ? nameMatch[1] : "";
+
+                    let isExported = false;
+                    let isUsedInternally = false;
+
+                    if (itemName) {
+                        const status = await this.analyzeExportStatus(
+                            filePath,
+                            lineNum,
+                            itemName
+                        );
+                        isExported = status.isExported;
+                        isUsedInternally = status.isUsedInternally;
+                    }
+
+                    // Filter based on granular settings
+                    if (type === "unused-variable") {
+                        const settings =
+                            this.configManager.getVariableCleaningSettings();
+
+                        if (
+                            isExported &&
+                            isUsedInternally &&
+                            settings.alwaysKeepExportedAndUsed
+                        ) {
+                            continue;
+                        }
+
+                        if (
+                            isExported &&
+                            !isUsedInternally &&
+                            !settings.cleanExportedButUnused
+                        ) {
+                            continue;
+                        }
+
+                        if (!isExported && !settings.cleanUnexported) {
+                            continue;
+                        }
+                    }
+
                     items.push({
                         type,
                         file: filePath,
@@ -209,7 +287,9 @@ export class JavaScriptAnalyzer implements IAnalyzer {
                         severity: severity.toLowerCase() as any,
                         confidence: "high",
                         category: "dead-code",
-                        isGrayArea: false,
+                        isGrayArea: isExported,
+                        isExported,
+                        isUsedInternally,
                     });
                 }
             }

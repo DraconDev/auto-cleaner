@@ -64,12 +64,12 @@ class TSAnalyzer {
             // Run tsc with flags to detect unused locals/params
             const command = "tsc --noEmit --noUnusedLocals --noUnusedParameters --pretty false";
             const output = await this.runCommand(command, workspace.uri.fsPath);
-            items.push(...this.parseTSOutput(output, workspace.uri.fsPath));
+            items.push(...(await this.parseTSOutput(output, workspace.uri.fsPath)));
         }
         catch (error) {
             console.error("TSAnalyzer scan failed:", error);
             if (error instanceof Error && error.stdout) {
-                items.push(...this.parseTSOutput(error.stdout, workspace.uri.fsPath));
+                items.push(...(await this.parseTSOutput(error.stdout, workspace.uri.fsPath)));
             }
         }
         // Calculate summary
@@ -128,7 +128,26 @@ class TSAnalyzer {
             });
         });
     }
-    parseTSOutput(output, workspacePath) {
+    async analyzeExportStatus(filePath, line, itemName) {
+        try {
+            const content = await fs.readFile(filePath, "utf-8");
+            const lines = content.split("\n");
+            const itemLine = lines[line - 1] || "";
+            // Check for 'export' keyword
+            // Matches: export const, export function, export class, export interface, export type, export var, export let
+            const isExported = /\bexport\s+(const|function|class|interface|type|var|let)\s+/.test(itemLine) || /\bexport\s*{\s*\w+/.test(content); // export { foo }
+            // Check internal usage (simple grep for the item name)
+            // We count occurrences. Definition is 1. Usage > 1.
+            const occurrences = content.split(itemName).length - 1;
+            const isUsedInternally = occurrences > 1;
+            return { isExported, isUsedInternally };
+        }
+        catch (error) {
+            console.error(`Error analyzing export status for ${itemName} in ${filePath}:`, error);
+            return { isExported: true, isUsedInternally: true };
+        }
+    }
+    async parseTSOutput(output, workspacePath) {
         const items = [];
         const lines = output.split("\n");
         const regex = /^(.+)\((\d+),(\d+)\): error TS(\d+): (.+)$/;
@@ -152,6 +171,37 @@ class TSAnalyzer {
                     type = "unused-import";
                 }
                 if (type !== "other") {
+                    // Extract item name from message or line content
+                    // Message format: "'foo' is declared but its value is never read."
+                    const nameMatch = message.match(/'([^']+)'/);
+                    const itemName = nameMatch ? nameMatch[1] : "";
+                    let isExported = false;
+                    let isUsedInternally = false;
+                    if (itemName) {
+                        const status = await this.analyzeExportStatus(file, lineNum, itemName);
+                        isExported = status.isExported;
+                        isUsedInternally = status.isUsedInternally;
+                    }
+                    // Filter based on granular settings
+                    if (type === "unused-variable" ||
+                        type === "unused-function") {
+                        const settings = type === "unused-function"
+                            ? this.configManager.getFunctionCleaningSettings()
+                            : this.configManager.getVariableCleaningSettings();
+                        if (isExported &&
+                            isUsedInternally &&
+                            settings.alwaysKeepExportedAndUsed) {
+                            continue;
+                        }
+                        if (isExported &&
+                            !isUsedInternally &&
+                            !settings.cleanExportedButUnused) {
+                            continue;
+                        }
+                        if (!isExported && !settings.cleanUnexported) {
+                            continue;
+                        }
+                    }
                     items.push({
                         type,
                         file,
@@ -161,7 +211,9 @@ class TSAnalyzer {
                         severity: "warning",
                         confidence: "high",
                         category: "dead-code",
-                        isGrayArea: false,
+                        isGrayArea: isExported,
+                        isExported,
+                        isUsedInternally,
                     });
                 }
             }

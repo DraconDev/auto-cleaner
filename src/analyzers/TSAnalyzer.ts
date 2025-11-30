@@ -56,15 +56,17 @@ export class TSAnalyzer implements IAnalyzer {
                 "tsc --noEmit --noUnusedLocals --noUnusedParameters --pretty false";
 
             const output = await this.runCommand(command, workspace.uri.fsPath);
-            items.push(...this.parseTSOutput(output, workspace.uri.fsPath));
+            items.push(
+                ...(await this.parseTSOutput(output, workspace.uri.fsPath))
+            );
         } catch (error) {
             console.error("TSAnalyzer scan failed:", error);
             if (error instanceof Error && (error as any).stdout) {
                 items.push(
-                    ...this.parseTSOutput(
+                    ...(await this.parseTSOutput(
                         (error as any).stdout,
                         workspace.uri.fsPath
-                    )
+                    ))
                 );
             }
         }
@@ -135,10 +137,42 @@ export class TSAnalyzer implements IAnalyzer {
         });
     }
 
-    private parseTSOutput(
+    private async analyzeExportStatus(
+        filePath: string,
+        line: number,
+        itemName: string
+    ): Promise<{ isExported: boolean; isUsedInternally: boolean }> {
+        try {
+            const content = await fs.readFile(filePath, "utf-8");
+            const lines = content.split("\n");
+            const itemLine = lines[line - 1] || "";
+
+            // Check for 'export' keyword
+            // Matches: export const, export function, export class, export interface, export type, export var, export let
+            const isExported =
+                /\bexport\s+(const|function|class|interface|type|var|let)\s+/.test(
+                    itemLine
+                ) || /\bexport\s*{\s*\w+/.test(content); // export { foo }
+
+            // Check internal usage (simple grep for the item name)
+            // We count occurrences. Definition is 1. Usage > 1.
+            const occurrences = content.split(itemName).length - 1;
+            const isUsedInternally = occurrences > 1;
+
+            return { isExported, isUsedInternally };
+        } catch (error) {
+            console.error(
+                `Error analyzing export status for ${itemName} in ${filePath}:`,
+                error
+            );
+            return { isExported: true, isUsedInternally: true };
+        }
+    }
+
+    private async parseTSOutput(
         output: string,
         workspacePath: string
-    ): CleanableItem[] {
+    ): Promise<CleanableItem[]> {
         const items: CleanableItem[] = [];
         const lines = output.split("\n");
         const regex = /^(.+)\((\d+),(\d+)\): error TS(\d+): (.+)$/;
@@ -163,6 +197,55 @@ export class TSAnalyzer implements IAnalyzer {
                 }
 
                 if (type !== "other") {
+                    // Extract item name from message or line content
+                    // Message format: "'foo' is declared but its value is never read."
+                    const nameMatch = message.match(/'([^']+)'/);
+                    const itemName = nameMatch ? nameMatch[1] : "";
+
+                    let isExported = false;
+                    let isUsedInternally = false;
+
+                    if (itemName) {
+                        const status = await this.analyzeExportStatus(
+                            file,
+                            lineNum,
+                            itemName
+                        );
+                        isExported = status.isExported;
+                        isUsedInternally = status.isUsedInternally;
+                    }
+
+                    // Filter based on granular settings
+                    if (
+                        type === "unused-variable" ||
+                        type === "unused-function"
+                    ) {
+                        const settings =
+                            type === "unused-function"
+                                ? this.configManager.getFunctionCleaningSettings()
+                                : this.configManager.getVariableCleaningSettings();
+
+                        if (
+                            isExported &&
+                            isUsedInternally &&
+                            settings.alwaysKeepExportedAndUsed
+                        ) {
+                            continue;
+                        }
+
+                        if (
+                            isExported &&
+                            !isUsedInternally &&
+                            !settings.cleanExportedButUnused
+                        ) {
+                            continue;
+                        }
+
+                        if (!isExported && !settings.cleanUnexported) {
+                            continue;
+                        }
+                    }
+
                     items.push({
                         type,
                         file,
@@ -172,7 +255,9 @@ export class TSAnalyzer implements IAnalyzer {
                         severity: "warning",
                         confidence: "high",
                         category: "dead-code",
-                        isGrayArea: false,
+                        isGrayArea: isExported,
+                        isExported,
+                        isUsedInternally,
                     });
                 }
             }
