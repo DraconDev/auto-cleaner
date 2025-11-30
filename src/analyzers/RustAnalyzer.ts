@@ -111,11 +111,18 @@ export class RustAnalyzer implements IAnalyzer {
                         `[RustAnalyzer] Running 'cargo check' in ${cwd}`
                     );
                     // Run cargo check with JSON output
+                    // Force warnings for unused code using RUSTFLAGS
                     const { stdout, stderr } = await execAsync(
                         "cargo check --message-format=json",
                         {
                             cwd,
                             maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+                            env: {
+                                ...process.env,
+                                RUSTFLAGS:
+                                    (process.env.RUSTFLAGS || "") +
+                                    " -W unused_imports -W dead_code -W unused_variables",
+                            },
                         }
                     );
 

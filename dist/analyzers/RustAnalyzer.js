@@ -89,9 +89,15 @@ class RustAnalyzer {
                 try {
                     Logger_1.Logger.log(`[RustAnalyzer] Running 'cargo check' in ${cwd}`);
                     // Run cargo check with JSON output
+                    // Force warnings for unused code using RUSTFLAGS
                     const { stdout, stderr } = await execAsync("cargo check --message-format=json", {
                         cwd,
-                        maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+                        maxBuffer: 10 * 1024 * 1024,
+                        env: {
+                            ...process.env,
+                            RUSTFLAGS: (process.env.RUSTFLAGS || "") +
+                                " -W unused_imports -W dead_code -W unused_variables",
+                        },
                     });
                     // Parse JSON lines from cargo output
                     const lines = (stdout + stderr)
