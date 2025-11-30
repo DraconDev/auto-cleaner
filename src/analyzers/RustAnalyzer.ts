@@ -287,16 +287,126 @@ export class RustAnalyzer implements IAnalyzer {
                     if (
                         item.type === "unused-import" &&
                         item.line &&
-                        item.endLine
+                        item.endLine &&
+                        item.column &&
+                        item.endColumn
                     ) {
-                        // Delete the import lines
                         const startLine = item.line - 1;
                         const endLine = item.endLine - 1;
-                        const range = new vscode.Range(
+                        const startCol = item.column - 1;
+                        const endCol = item.endColumn - 1;
+
+                        // Get the text of the line(s)
+                        const lineRange = new vscode.Range(
                             new vscode.Position(startLine, 0),
-                            new vscode.Position(endLine + 1, 0) // Include line break
+                            new vscode.Position(endLine + 1, 0)
                         );
-                        edit.delete(vscode.Uri.file(filePath), range);
+                        const fullText = document.getText(lineRange);
+
+                        // Check if it's a multi-import (contains '{')
+                        // This is a heuristic, but usually sufficient for 'use' statements
+                        if (fullText.includes("{")) {
+                            // Smart deletion for multi-imports
+                            let deleteRange = new vscode.Range(
+                                new vscode.Position(startLine, startCol),
+                                new vscode.Position(endLine, endCol)
+                            );
+
+                            // Check for trailing comma
+                            const afterRange = new vscode.Range(
+                                new vscode.Position(endLine, endCol),
+                                new vscode.Position(endLine, endCol + 1)
+                            );
+                            const charAfter = document.getText(afterRange);
+
+                            if (charAfter === ",") {
+                                // Include trailing comma and potential whitespace
+                                deleteRange = new vscode.Range(
+                                    new vscode.Position(startLine, startCol),
+                                    new vscode.Position(endLine, endCol + 1)
+                                );
+                                // Also try to consume following whitespace
+                                const wsRange = new vscode.Range(
+                                    new vscode.Position(endLine, endCol + 1),
+                                    new vscode.Position(endLine, endCol + 2)
+                                );
+                                if (document.getText(wsRange) === " ") {
+                                    deleteRange = new vscode.Range(
+                                        new vscode.Position(
+                                            startLine,
+                                            startCol
+                                        ),
+                                        new vscode.Position(endLine, endCol + 2)
+                                    );
+                                }
+                            } else {
+                                // Check for leading comma if no trailing comma
+                                if (startCol > 0) {
+                                    const beforeRange = new vscode.Range(
+                                        new vscode.Position(
+                                            startLine,
+                                            startCol - 1
+                                        ),
+                                        new vscode.Position(startLine, startCol)
+                                    );
+                                    const charBefore =
+                                        document.getText(beforeRange);
+                                    if (charBefore === ",") {
+                                        // Include leading comma
+                                        deleteRange = new vscode.Range(
+                                            new vscode.Position(
+                                                startLine,
+                                                startCol - 1
+                                            ),
+                                            new vscode.Position(endLine, endCol)
+                                        );
+                                        // Also try to consume leading whitespace before comma
+                                        if (startCol > 1) {
+                                            const wsBefore = new vscode.Range(
+                                                new vscode.Position(
+                                                    startLine,
+                                                    startCol - 2
+                                                ),
+                                                new vscode.Position(
+                                                    startLine,
+                                                    startCol - 1
+                                                )
+                                            );
+                                            if (
+                                                document.getText(wsBefore) ===
+                                                " "
+                                            ) {
+                                                deleteRange = new vscode.Range(
+                                                    new vscode.Position(
+                                                        startLine,
+                                                        startCol - 2
+                                                    ),
+                                                    new vscode.Position(
+                                                        endLine,
+                                                        endCol
+                                                    )
+                                                );
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            edit.delete(vscode.Uri.file(filePath), deleteRange);
+                        } else {
+                            // Single import, safe to delete the line(s)
+                            // But let's be precise: delete the statement
+                            // If the span covers the whole line, delete the line
+                            // If it's just 'use crate::Foo', we want to delete 'use crate::Foo;'
+
+                            // For now, reverting to line deletion for single imports as it's safer
+                            // than leaving 'use ;' artifacts, and usually correct for single imports.
+                            const range = new vscode.Range(
+                                new vscode.Position(startLine, 0),
+                                new vscode.Position(endLine + 1, 0)
+                            );
+                            edit.delete(vscode.Uri.file(filePath), range);
+                        }
                     }
                 }
 
