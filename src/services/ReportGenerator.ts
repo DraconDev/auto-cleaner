@@ -8,7 +8,7 @@ export class ReportGenerator {
         cssResults: CSSAnalysisResults,
         otherResults: AnalysisResult[] = []
     ): string {
-        let report = "# Auto Cleaner Report\n\n";
+        let report = "# auto cleaner pro Report\n\n";
         report += `Generated on: ${new Date().toLocaleString()}\n\n`;
 
         // 1. Summary

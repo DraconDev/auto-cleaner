@@ -29,8 +29,8 @@ class StatusBarManager {
     constructor() {
         this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
         this.statusBarItem.command = "autoCleaner.showMenu";
-        this.statusBarItem.tooltip = "Auto Cleaner - Click for actions";
-        this.statusBarItem.text = "$(trash) Auto Cleaner";
+        this.statusBarItem.tooltip = "auto cleaner pro - Click for actions";
+        this.statusBarItem.text = "$(trash) auto cleaner pro";
         this.statusBarItem.show();
     }
     updateStatus(text, icon = "$(trash)") {

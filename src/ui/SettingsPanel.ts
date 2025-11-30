@@ -63,7 +63,7 @@ export class SettingsPanel {
         // Otherwise, create a new panel.
         const panel = vscode.window.createWebviewPanel(
             SettingsPanel.viewType,
-            "Auto Cleaner Settings",
+            "auto cleaner pro Settings",
             column || vscode.ViewColumn.One,
             {
                 enableScripts: true,
@@ -215,7 +215,7 @@ export class SettingsPanel {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Auto Cleaner Settings</title>
+        <title>auto cleaner pro Settings</title>
         <style>
           body { font-family: var(--vscode-font-family); padding: 20px; color: var(--vscode-editor-foreground); background-color: var(--vscode-editor-background); max-width: 800px; margin: 0 auto; }
           h1 { border-bottom: 1px solid var(--vscode-panel-border); padding-bottom: 10px; }
@@ -239,7 +239,7 @@ export class SettingsPanel {
         </style>
       </head>
       <body>
-        <h1>Auto Cleaner Settings</h1>
+        <h1>auto cleaner pro Settings</h1>
 
         <div class="section">
           <h2>Analyzers</h2>

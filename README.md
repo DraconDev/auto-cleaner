@@ -1,4 +1,4 @@
-# Auto Cleaner
+# auto cleaner pro
 
 The **ultimate automatic code cleaner** for multiple languages with intelligent granular control. Automatically detects and removes unused imports, functions, variables, and more across **Rust**, **Go**, **TypeScript**, **JavaScript**, **Python**, **CSS**, and filesystem.
 
@@ -31,7 +31,7 @@ Fine-tune what gets cleaned based on export status and usage:
 
 ### ⚙️ Powerful Configuration
 
--   **Interactive Settings Tab**: Manage all settings via a dedicated UI (`Auto Cleaner: Open Settings`)
+-   **Interactive Settings Tab**: Manage all settings via a dedicated UI (`auto cleaner pro: Open Settings`)
 -   **Whitelists**: Protect specific files, folders, or patterns from ever being cleaned
 -   **Exclusions**: Skip analysis for heavy directories like `node_modules` or `target`
 -   **Analyzer Toggles**: Enable/disable specific language analyzers
@@ -59,14 +59,14 @@ Fine-tune what gets cleaned based on export status and usage:
 
 ### Commands
 
--   **Auto Cleaner: Open Settings**: Open the interactive configuration tab
--   **Auto Cleaner: Scan Project**: Scan all enabled analyzers
--   **Auto Cleaner: Clean All Unused Code**: Remove all detected unused code
--   **Auto Cleaner: Generate Report**: View interactive report with selective cleaning
+-   **auto cleaner pro: Open Settings**: Open the interactive configuration tab
+-   **auto cleaner pro: Scan Project**: Scan all enabled analyzers
+-   **auto cleaner pro: Clean All Unused Code**: Remove all detected unused code
+-   **auto cleaner pro: Generate Report**: View interactive report with selective cleaning
 
 ### Status Bar
 
-Click the status bar item (`🧹 Auto Cleaner`) to:
+Click the status bar item (`🧹 auto cleaner pro`) to:
 
 -   See real-time count of unused items
 -   Access quick action menu (Scan, Clean, Settings, Report)
@@ -103,7 +103,7 @@ Automatic commits before cleaning (recommended):
 
 ## ⚙️ Configuration
 
-We recommend using the **Settings Tab** (`Auto Cleaner: Open Settings`) for the best experience.
+We recommend using the **Settings Tab** (`auto cleaner pro: Open Settings`) for the best experience.
 
 ### Key Settings
 
@@ -137,7 +137,7 @@ We recommend using the **Settings Tab** (`Auto Cleaner: Open Settings`) for the 
 
 ## 🎨 Export Detection
 
-Auto Cleaner intelligently detects exported items across languages:
+auto cleaner pro intelligently detects exported items across languages:
 
 -   **Rust**: Identifies `pub` keyword
 -   **TypeScript/JavaScript**: Identifies `export` keyword and `module.exports`
@@ -170,7 +170,7 @@ MIT License
 
 ### 2.0.0 - Major Rebranding
 
--   **Rebranding**: Renamed to "Auto Cleaner"
+-   **Rebranding**: Renamed to "auto cleaner pro"
 -   **New Architecture**: Plugin-based system for easy multi-language support
 -   **New Analyzers**: Added support for Rust and Go
 -   **Settings UI**: Dedicated webview for managing configuration

@@ -29,7 +29,7 @@ class Logger {
     static initialize() {
         if (!this._outputChannel) {
             this._outputChannel =
-                vscode.window.createOutputChannel("Auto Cleaner");
+                vscode.window.createOutputChannel("auto cleaner pro");
         }
     }
     static log(message) {

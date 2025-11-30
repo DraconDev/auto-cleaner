@@ -42,13 +42,13 @@ export class GitManager {
 
             Logger.log("[GitManager] Commit successful.");
             vscode.window.showInformationMessage(
-                `Auto Cleaner: Created backup commit: "${message}"`
+                `auto cleaner pro: Created backup commit: "${message}"`
             );
             return true;
         } catch (error) {
             Logger.error("[GitManager] Commit failed", error);
             vscode.window.showErrorMessage(
-                `Auto Cleaner: Failed to create backup commit. Check Output channel.`
+                `auto cleaner pro: Failed to create backup commit. Check Output channel.`
             );
             return false;
         }
@@ -63,7 +63,7 @@ export class GitManager {
         } catch (error) {
             Logger.error("[GitManager] Push failed", error);
             vscode.window.showErrorMessage(
-                `Auto Cleaner: Failed to push changes. Check Output channel.`
+                `auto cleaner pro: Failed to push changes. Check Output channel.`
             );
             return false;
         }

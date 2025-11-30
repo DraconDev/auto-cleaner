@@ -55,7 +55,7 @@ let reportGenerator;
 let scanInterval;
 let lastAnalysisResults = [];
 function activate(context) {
-    console.log("Auto Cleaner extension is now active");
+    console.log("auto cleaner pro extension is now active");
     // Initialize managers
     Logger_1.Logger.initialize();
     configurationManager = new ConfigurationManager_1.ConfigurationManager();
@@ -90,14 +90,14 @@ function activate(context) {
         Logger_1.Logger.log(`Git commit enabled: ${configurationManager.isGitCommitEnabled()}`);
         Logger_1.Logger.log("=== Running scan ===");
         await performScan();
-        vscode.window.showInformationMessage("Auto Cleaner: Check Output panel for debug logs");
+        vscode.window.showInformationMessage("auto cleaner pro: Check Output panel for debug logs");
     });
     const toggleGitCommitCommand = vscode.commands.registerCommand("autoCleaner.toggleGitCommit", async () => {
         const config = vscode.workspace.getConfiguration("autoCleaner");
         const currentValue = config.get("createGitCommit", true);
         await config.update("createGitCommit", !currentValue, vscode.ConfigurationTarget.Global);
         const newValue = !currentValue;
-        vscode.window.showInformationMessage(`Auto Cleaner: Git auto-commit ${newValue ? "enabled" : "disabled"}`);
+        vscode.window.showInformationMessage(`auto cleaner pro: Git auto-commit ${newValue ? "enabled" : "disabled"}`);
     });
     const cleanCommand = vscode.commands.registerCommand("autoCleaner.clean", async () => {
         await performClean();
@@ -146,7 +146,7 @@ function activate(context) {
             },
         ];
         const selection = await vscode.window.showQuickPick(items, {
-            placeHolder: "Auto Cleaner Actions",
+            placeHolder: "auto cleaner pro Actions",
         });
         if (selection) {
             vscode.commands.executeCommand(selection.command);
@@ -188,7 +188,7 @@ function activate(context) {
             await performAutoClean();
         }
     }));
-    console.log("Auto Cleaner extension setup complete");
+    console.log("auto cleaner pro extension setup complete");
 }
 exports.activate = activate;
 async function createBackupCommit() {
@@ -211,7 +211,7 @@ async function createBackupCommit() {
         return true;
     }
     const timestamp = new Date().toISOString();
-    const commitMessage = `[Auto Cleaner Backup] Before cleaning - ${timestamp}`;
+    const commitMessage = `[auto cleaner pro Backup] Before cleaning - ${timestamp}`;
     const success = await gitManager.commitChanges(cwd, commitMessage);
     if (success && configurationManager.isGitPushEnabled()) {
         await gitManager.pushChanges(cwd);
@@ -222,7 +222,7 @@ function deactivate() {
     if (scanInterval) {
         clearInterval(scanInterval);
     }
-    console.log("Auto Cleaner extension is now deactivated");
+    console.log("auto cleaner pro extension is now deactivated");
 }
 exports.deactivate = deactivate;
 async function performScan() {
@@ -288,7 +288,7 @@ async function performScan() {
     catch (error) {
         console.error("Error during scan:", error);
         statusBarManager.updateStatus("Scan Error", "$(error)");
-        vscode.window.showErrorMessage("Auto Cleaner: Error during scan - check output panel for details");
+        vscode.window.showErrorMessage("auto cleaner pro: Error during scan - check output panel for details");
     }
 }
 async function performClean() {
@@ -311,7 +311,7 @@ async function performClean() {
             allItems.push(...result.items);
         }
         if (allItems.length === 0) {
-            vscode.window.showInformationMessage("Auto Cleaner: No unused code found");
+            vscode.window.showInformationMessage("auto cleaner pro: No unused code found");
             statusBarManager.updateStatus("Ready", "$(check)");
             return;
         }
@@ -345,18 +345,18 @@ async function performClean() {
         await performScan();
         statusBarManager.updateStatus(`Cleaned ${totalCleaned} items`, "$(check)");
         if (errors.length > 0) {
-            vscode.window.showWarningMessage(`Auto Cleaner: Removed ${totalCleaned} items with ${errors.length} errors. Check output.`);
+            vscode.window.showWarningMessage(`auto cleaner pro: Removed ${totalCleaned} items with ${errors.length} errors. Check output.`);
             Logger_1.Logger.error("[Extension] Clean errors:", errors);
         }
         else {
-            vscode.window.showInformationMessage(`Auto Cleaner: Successfully removed ${totalCleaned} unused items`);
+            vscode.window.showInformationMessage(`auto cleaner pro: Successfully removed ${totalCleaned} unused items`);
         }
     }
     catch (error) {
         console.error("Error during clean:", error);
         Logger_1.Logger.error("[Extension] Fatal error during clean", error);
         statusBarManager.updateStatus("Clean Error", "$(error)");
-        vscode.window.showErrorMessage("Auto Cleaner: Error during cleaning - check output panel for details");
+        vscode.window.showErrorMessage("auto cleaner pro: Error during cleaning - check output panel for details");
     }
 }
 function getAnalyzer(name) {
@@ -402,17 +402,17 @@ async function performCleanUnusedFiles() {
         // Create backup commit before cleaning
         const commitSuccess = await createBackupCommit();
         if (!commitSuccess) {
-            vscode.window.showWarningMessage("Auto Cleaner: Failed to create backup commit. Proceeding anyway...");
+            vscode.window.showWarningMessage("auto cleaner pro: Failed to create backup commit. Proceeding anyway...");
         }
         await performScan();
         const cssResult = lastAnalysisResults.find((r) => r.analyzerName === "css");
         if (!cssResult) {
-            vscode.window.showInformationMessage("Auto Cleaner: No CSS issues found");
+            vscode.window.showInformationMessage("auto cleaner pro: No CSS issues found");
             return;
         }
         const unusedFiles = cssResult.items.filter((i) => i.type === "unused-file");
         if (unusedFiles.length === 0) {
-            vscode.window.showInformationMessage("Auto Cleaner: No unused CSS files found");
+            vscode.window.showInformationMessage("auto cleaner pro: No unused CSS files found");
             return;
         }
         const action = await vscode.window.showWarningMessage(`Found ${unusedFiles.length} unused CSS files. Delete them?`, { modal: true }, "Delete", "Cancel");
@@ -425,7 +425,7 @@ async function performCleanUnusedFiles() {
         await performScan();
         if (cleanResult.success) {
             statusBarManager.updateStatus(`Deleted ${cleanResult.itemsCleaned} files`, "$(check)");
-            vscode.window.showInformationMessage(`Auto Cleaner: Successfully deleted ${cleanResult.itemsCleaned} unused files`);
+            vscode.window.showInformationMessage(`auto cleaner pro: Successfully deleted ${cleanResult.itemsCleaned} unused files`);
         }
         else {
             throw new Error("Failed to delete some files");
@@ -434,7 +434,7 @@ async function performCleanUnusedFiles() {
     catch (error) {
         console.error("Error cleaning unused files:", error);
         statusBarManager.updateStatus("Clean Error", "$(error)");
-        vscode.window.showErrorMessage("Auto Cleaner: Error deleting files - check output panel for details");
+        vscode.window.showErrorMessage("auto cleaner pro: Error deleting files - check output panel for details");
     }
 }
 async function performCleanVariables() {
@@ -442,17 +442,17 @@ async function performCleanVariables() {
         // Create backup commit before cleaning
         const commitSuccess = await createBackupCommit();
         if (!commitSuccess) {
-            vscode.window.showWarningMessage("Auto Cleaner: Failed to create backup commit. Proceeding anyway...");
+            vscode.window.showWarningMessage("auto cleaner pro: Failed to create backup commit. Proceeding anyway...");
         }
         await performScan();
         const cssResult = lastAnalysisResults.find((r) => r.analyzerName === "css");
         if (!cssResult) {
-            vscode.window.showInformationMessage("Auto Cleaner: No CSS issues found");
+            vscode.window.showInformationMessage("auto cleaner pro: No CSS issues found");
             return;
         }
         const unusedVars = cssResult.items.filter((i) => i.type === "unused-variable");
         if (unusedVars.length === 0) {
-            vscode.window.showInformationMessage("Auto Cleaner: No unused CSS variables found");
+            vscode.window.showInformationMessage("auto cleaner pro: No unused CSS variables found");
             return;
         }
         const action = await vscode.window.showWarningMessage(`Found ${unusedVars.length} unused CSS variables. Remove them?`, { modal: true }, "Remove", "Cancel");
@@ -464,12 +464,12 @@ async function performCleanVariables() {
         // Refresh
         await performScan();
         statusBarManager.updateStatus(`Removed ${cleanResult.itemsCleaned} variables`, "$(check)");
-        vscode.window.showInformationMessage(`Auto Cleaner: Successfully removed ${cleanResult.itemsCleaned} unused variables`);
+        vscode.window.showInformationMessage(`auto cleaner pro: Successfully removed ${cleanResult.itemsCleaned} unused variables`);
     }
     catch (error) {
         console.error("Error cleaning variables:", error);
         statusBarManager.updateStatus("Clean Error", "$(error)");
-        vscode.window.showErrorMessage("Auto Cleaner: Error removing variables - check output panel for details");
+        vscode.window.showErrorMessage("auto cleaner pro: Error removing variables - check output panel for details");
     }
 }
 async function performAutoClean() {

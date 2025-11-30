@@ -1,9 +1,9 @@
 {
   "name": "auto-cleaner",
-  "displayName": "Auto Cleaner",
+  "displayName": "auto cleaner pro",
   "description": "Automatically cleans unused code across multiple languages (Rust, Go, CSS, TypeScript, and more)",
   "icon": "thumb.png",
-  "version": "2.7.37",
+  "version": "2.7.38",
   "publisher": "devdrac",
   "engines": {
     "vscode": "^1.74.0"
@@ -32,45 +32,45 @@
     "commands": [
       {
         "command": "autoCleaner.openSettings",
-        "title": "Auto Cleaner: Open Settings",
-        "category": "Auto Cleaner"
+        "title": "auto cleaner pro: Open Settings",
+        "category": "auto cleaner pro"
       },
       {
         "command": "autoCleaner.scan",
-        "title": "Auto Cleaner: Scan for Unused Code",
-        "category": "Auto Cleaner"
+        "title": "auto cleaner pro: Scan for Unused Code",
+        "category": "auto cleaner pro"
       },
       {
         "command": "autoCleaner.clean",
-        "title": "Auto Cleaner: Clean All Unused Code",
-        "category": "Auto Cleaner"
+        "title": "auto cleaner pro: Clean All Unused Code",
+        "category": "auto cleaner pro"
       },
       {
         "command": "autoCleaner.generateReport",
-        "title": "Auto Cleaner: Generate Report",
-        "category": "Auto Cleaner"
+        "title": "auto cleaner pro: Generate Report",
+        "category": "auto cleaner pro"
       },
       {
         "command": "autoCleaner.cleanUnusedFiles",
-        "title": "Auto Cleaner: Clean Unused Files",
-        "category": "Auto Cleaner"
+        "title": "auto cleaner pro: Clean Unused Files",
+        "category": "auto cleaner pro"
       },
       {
         "command": "autoCleaner.cleanVariables",
-        "title": "Auto Cleaner: Clean Unused Variables",
-        "category": "Auto Cleaner"
+        "title": "auto cleaner pro: Clean Unused Variables",
+        "category": "auto cleaner pro"
       },
       {
         "command": "autoCleaner.showMenu",
-        "title": "Auto Cleaner: Show Menu",
-        "category": "Auto Cleaner"
+        "title": "auto cleaner pro: Show Menu",
+        "category": "auto cleaner pro"
       }
     ],
     "views": {
       "explorer": [
         {
           "id": "autoCleaner",
-          "name": "Auto Cleaner"
+          "name": "auto cleaner pro"
         }
       ]
     },
@@ -78,7 +78,7 @@
       "activitybar": [
         {
           "id": "autoCleaner",
-          "title": "Auto Cleaner",
+          "title": "auto cleaner pro",
           "icon": "$(trash)"
         }
       ]
@@ -86,12 +86,12 @@
     "statusBar": {
       "autoCleaner.status": {
         "id": "autoCleanerStatus",
-        "name": "Auto Cleaner Status"
+        "name": "auto cleaner pro Status"
       }
     },
     "configuration": [
       {
-        "title": "Auto Cleaner",
+        "title": "auto cleaner pro",
         "properties": {
           "autoCleaner.scanOnSave": {
             "type": "boolean",

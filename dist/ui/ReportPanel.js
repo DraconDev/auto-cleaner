@@ -52,7 +52,7 @@ class ReportPanel {
             return;
         }
         // Otherwise, create a new panel
-        const panel = vscode.window.createWebviewPanel("autoCleanerReport", "Auto Cleaner Report", column, {
+        const panel = vscode.window.createWebviewPanel("autoCleanerReport", "auto cleaner pro Report", column, {
             enableScripts: true,
             retainContextWhenHidden: true,
             localResourceRoots: [extensionUri],
@@ -99,7 +99,7 @@ class ReportPanel {
                     await analyzer.clean(analyzerItems);
                 }
             }
-            vscode.window.showInformationMessage(`Auto Cleaner: Successfully cleaned ${items.length} items`);
+            vscode.window.showInformationMessage(`auto cleaner pro: Successfully cleaned ${items.length} items`);
             // Refresh the panel
             // Note: In a real app we might want to re-scan here to verify
             // For now, we just remove them from the UI or keep them until next scan
@@ -107,7 +107,7 @@ class ReportPanel {
             vscode.commands.executeCommand("autoCleaner.generateReport");
         }
         catch (error) {
-            vscode.window.showErrorMessage(`Auto Cleaner: Error cleaning items - ${error}`);
+            vscode.window.showErrorMessage(`auto cleaner pro: Error cleaning items - ${error}`);
         }
     }
     async _openFile(filePath, line) {
@@ -155,7 +155,7 @@ class ReportPanel {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
-    <title>Auto Cleaner Report</title>
+    <title>auto cleaner pro Report</title>
     <style>
         body {
             font-family: var(--vscode-font-family);
@@ -345,7 +345,7 @@ class ReportPanel {
 </head>
 <body>
     <div class="header">
-        <h1>Auto Cleaner Report</h1>
+        <h1>auto cleaner pro Report</h1>
         <div class="stats">
             <div class="stat">
                 <span>Total Issues:</span>

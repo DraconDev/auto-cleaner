@@ -323,7 +323,7 @@ export class RustAnalyzer implements IAnalyzer {
                     }
 
                     vscode.window.showErrorMessage(
-                        `Auto Cleaner: Cargo check failed. Check 'Auto Cleaner' output channel for details.`
+                        `auto cleaner pro: Cargo check failed. Check 'auto cleaner pro' output channel for details.`
                     );
                     // Continue to next project root if any
                 }

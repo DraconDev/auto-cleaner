@@ -28,7 +28,7 @@ const path = __importStar(require("path"));
 const vscode = __importStar(require("vscode"));
 class ReportGenerator {
     generateReport(cssResults, otherResults = []) {
-        let report = "# Auto Cleaner Report\n\n";
+        let report = "# auto cleaner pro Report\n\n";
         report += `Generated on: ${new Date().toLocaleString()}\n\n`;
         // 1. Summary
         report += "## Summary\n\n";
