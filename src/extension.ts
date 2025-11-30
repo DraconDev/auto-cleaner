@@ -474,7 +474,7 @@ async function performClean() {
                     if (result.errors.length > 0) {
                         errors.push(
                             ...result.errors.map(
-                                (e) => `${analyzerName}: ${e.error}`
+                                (e: any) => `${analyzerName}: ${e.error}`
                             )
                         );
                     }
