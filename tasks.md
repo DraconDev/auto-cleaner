@@ -2,7 +2,10 @@
 
 - btw there would be good to have a deeper breakdown in general settings so function like what kind?  unexported, exported but unused? export and used is a safe keep for sure, similar can be said for variables
 -  in report section if i select the square check box next to the type, in the header of the list it correctly turn all on, but itself doesn't turn on, and we have can also can't toggle off 
--  when run a clean we seem to delete the line that is 
+-  when run a clean we seem to delete the line that is needlessly instead of the unused import so
+   - use crate::components::{Civilian, Enemy, Player, Police, SoulValue, Velocity};
+   - use crate::plugins::core::AppState;
+   - use crate::resources::{Director, ObjectPool, TimeManager};
 
 # Check
 
