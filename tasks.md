@@ -1,11 +1,11 @@
 # Do
 
 - btw there would be good to have a deeper breakdown in general settings so function like what kind?  unexported, exported but unused? export and used is a safe keep for sure, similar can be said for variables
-- we should not only git commit but push before cleaning
 - we need to update the clean commands they are still from the time we only did css
 
 # Done 
 
+- we should not only git commit but push before cleaning
 -  when run a clean we seem to delete the line that is needlessly instead of the unused import so
    - ```use crate::components::{Civilian, Enemy, Player, Police, SoulValue, Velocity};
         use crate::plugins::core::AppState;
