@@ -1,15 +1,15 @@
 # Do
 
 - btw there would be good to have a deeper breakdown in general settings so function like what kind?  unexported, exported but unused? export and used is a safe keep for sure, similar can be said for variables
+- we should not only git commit but push before cleaning
+
+# Done 
+
 -  when run a clean we seem to delete the line that is needlessly instead of the unused import so
    - ```use crate::components::{Civilian, Enemy, Player, Police, SoulValue, Velocity};
         use crate::plugins::core::AppState;
         use crate::resources::{Director, ObjectPool, TimeManager};```
    - so if needlessly imported then simply the line is deleted instead of the import
-- we should not only git commit but push before cleaning
-
-# Done 
-
 -  in report section if i select the square check box next to the type, in the header of the list it correctly turn all on, but itself doesn't turn on, and we have can also can't toggle off 
 - make a git commit before cleaning in every setting unless turned off, but it should be on by default 
   - we didn'tdo a git commit before cleaning, in fact cleaning didn't anything seemingly, and we are still not recognizing rust
