@@ -343,7 +343,6 @@ export class RustAnalyzer implements IAnalyzer {
                         //    Bar, Baz
                         // };
 
-                        const lineText = document.lineAt(startLine).text;
                         const textBefore = lineText
                             .substring(0, startCol)
                             .trim();
