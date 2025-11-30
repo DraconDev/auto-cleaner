@@ -41,6 +41,9 @@ export interface CleanableItem {
     codeSnippet?: string;
     suggestion?: string;
     isGrayArea: boolean;
+    isExported?: boolean;
+    isUsedInternally?: boolean;
+    isUsedExternally?: boolean;
     data?: any;
 }
 /**

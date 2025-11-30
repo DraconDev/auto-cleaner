@@ -87,6 +87,21 @@ class ConfigurationManager {
     isDryRun() {
         return this.getConfiguration().get("dryRun", true);
     }
+    // Granular cleaning settings
+    getFunctionCleaningSettings() {
+        return this.getConfiguration().get("cleaning.functions", {
+            cleanUnexported: true,
+            cleanExportedButUnused: false,
+            alwaysKeepExportedAndUsed: true,
+        });
+    }
+    getVariableCleaningSettings() {
+        return this.getConfiguration().get("cleaning.variables", {
+            cleanUnexported: true,
+            cleanExportedButUnused: false,
+            alwaysKeepExportedAndUsed: true,
+        });
+    }
     // Target directories
     getTargetDirectories() {
         return this.getConfiguration().get("targetDirectories", []);

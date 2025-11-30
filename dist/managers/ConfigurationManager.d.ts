@@ -16,6 +16,16 @@ export declare class ConfigurationManager {
     isGitCommitEnabled(): boolean;
     isGitPushEnabled(): boolean;
     isDryRun(): boolean;
+    getFunctionCleaningSettings(): {
+        cleanUnexported: boolean;
+        cleanExportedButUnused: boolean;
+        alwaysKeepExportedAndUsed: boolean;
+    };
+    getVariableCleaningSettings(): {
+        cleanUnexported: boolean;
+        cleanExportedButUnused: boolean;
+        alwaysKeepExportedAndUsed: boolean;
+    };
     getTargetDirectories(): string[];
     getExcludePatterns(): string[];
     getWhitelistPatterns(): string[];

@@ -3,7 +3,7 @@
   "displayName": "Auto Cleaner",
   "description": "Automatically cleans unused code across multiple languages (Rust, Go, CSS, TypeScript, and more)",
   "icon": "thumb.png",
-  "version": "2.7.22",
+  "version": "2.7.23",
   "publisher": "devdrac",
   "engines": {
     "vscode": "^1.74.0"
@@ -197,6 +197,52 @@
             "type": "boolean",
             "default": false,
             "description": "Automatically push the backup commit to the remote repository"
+          },
+          "autoCleaner.cleaning.functions": {
+            "type": "object",
+            "default": {
+              "cleanUnexported": true,
+              "cleanExportedButUnused": false,
+              "alwaysKeepExportedAndUsed": true
+            },
+            "properties": {
+              "cleanUnexported": {
+                "type": "boolean",
+                "description": "Clean functions that are not exported and not used"
+              },
+              "cleanExportedButUnused": {
+                "type": "boolean",
+                "description": "Clean functions that are exported but never called/referenced"
+              },
+              "alwaysKeepExportedAndUsed": {
+                "type": "boolean",
+                "description": "Always keep functions that are both exported and used (recommended)"
+              }
+            },
+            "description": "Configure which types of functions to clean"
+          },
+          "autoCleaner.cleaning.variables": {
+            "type": "object",
+            "default": {
+              "cleanUnexported": true,
+              "cleanExportedButUnused": false,
+              "alwaysKeepExportedAndUsed": true
+            },
+            "properties": {
+              "cleanUnexported": {
+                "type": "boolean",
+                "description": "Clean variables that are not exported and not used"
+              },
+              "cleanExportedButUnused": {
+                "type": "boolean",
+                "description": "Clean variables that are exported but never referenced"
+              },
+              "alwaysKeepExportedAndUsed": {
+                "type": "boolean",
+                "description": "Always keep variables that are both exported and used (recommended)"
+              }
+            },
+            "description": "Configure which types of variables to clean"
           },
           "autoCleaner.whitelistFiles": {
             "type": "array",
