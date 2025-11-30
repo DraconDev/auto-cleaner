@@ -1,4 +1,6 @@
+```typescript
 import { exec } from "child_process";
+import * as fs from "fs-extra";
 import * as path from "path";
 import { promisify } from "util";
 import * as vscode from "vscode";
