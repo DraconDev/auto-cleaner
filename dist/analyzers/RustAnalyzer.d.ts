@@ -12,6 +12,10 @@ export declare class RustAnalyzer implements IAnalyzer {
     readonly fileExtensions: string[];
     constructor(configManager: any);
     isEnabled(): boolean;
+    analyzeExportStatus(filePath: string, line: number, itemName: string): Promise<{
+        isExported: boolean;
+        isUsedInternally: boolean;
+    }>;
     scan(workspace: vscode.WorkspaceFolder): Promise<AnalysisResult>;
     clean(items: CleanableItem[]): Promise<CleanResult>;
 }

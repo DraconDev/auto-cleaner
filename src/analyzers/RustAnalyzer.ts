@@ -207,6 +207,56 @@ export class RustAnalyzer implements IAnalyzer {
                                             : path.join(cwd, span.file_name);
 
                                         filesSet.add(absPath);
+
+                                        // Analyze export status
+                                        const itemName = span.text[0]?.text;
+                                        let isExported = false;
+                                        let isUsedInternally = false;
+
+                                        if (itemName) {
+                                            const status =
+                                                await this.analyzeExportStatus(
+                                                    absPath,
+                                                    span.line_start,
+                                                    itemName
+                                                );
+                                            isExported = status.isExported;
+                                            isUsedInternally =
+                                                status.isUsedInternally;
+                                        }
+
+                                        // Filter based on granular settings
+                                        // For imports, we generally treat them as "variables" or "functions" depending on context
+                                        // But unused imports are usually safe to remove regardless of export status
+                                        // However, if it's a `pub use`, it's an export.
+
+                                        // If it's exported and used internally, and we want to keep those:
+                                        const funcSettings =
+                                            this.configManager.getFunctionCleaningSettings();
+
+                                        if (
+                                            isExported &&
+                                            isUsedInternally &&
+                                            funcSettings.alwaysKeepExportedAndUsed
+                                        ) {
+                                            continue; // Skip this item
+                                        }
+
+                                        if (
+                                            isExported &&
+                                            !isUsedInternally &&
+                                            !funcSettings.cleanExportedButUnused
+                                        ) {
+                                            continue; // Skip this item
+                                        }
+
+                                        if (
+                                            !isExported &&
+                                            !funcSettings.cleanUnexported
+                                        ) {
+                                            continue; // Skip this item
+                                        }
+
                                         items.push({
                                             type: "unused-import",
                                             description: msg.message.message,
@@ -218,9 +268,11 @@ export class RustAnalyzer implements IAnalyzer {
                                             severity: "warning",
                                             confidence: "high",
                                             category: "dead-code",
-                                            codeSnippet: span.text[0]?.text,
+                                            codeSnippet: itemName,
                                             suggestion: "Remove unused import",
-                                            isGrayArea: false,
+                                            isGrayArea: isExported,
+                                            isExported,
+                                            isUsedInternally,
                                         });
                                     }
                                 }

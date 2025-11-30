@@ -45,6 +45,29 @@ class RustAnalyzer {
     isEnabled() {
         return this.configManager.isAnalyzerEnabled("rust");
     }
+    async analyzeExportStatus(filePath, line, itemName) {
+        try {
+            const content = await fs.readFile(filePath, "utf-8");
+            const lines = content.split("\n");
+            const itemLine = lines[line - 1] || "";
+            // Check for 'pub' keyword
+            // Matches: pub fn, pub struct, pub enum, pub const, pub static, pub type, pub trait, pub mod
+            // Also handles pub(crate), pub(super) which are technically exported from the module but restricted
+            const isExported = /\bpub(\([^)]+\))?\s+(fn|struct|enum|trait|const|static|type|mod)\s+/.test(itemLine);
+            // Check internal usage (simple grep for the item name)
+            // We count occurrences. Definition is 1. Usage > 1.
+            // This is a heuristic and might have false positives (comments, strings)
+            // but is safer than deleting potentially used code.
+            const occurrences = content.split(itemName).length - 1;
+            const isUsedInternally = occurrences > 1;
+            return { isExported, isUsedInternally };
+        }
+        catch (error) {
+            Logger_1.Logger.error(`[RustAnalyzer] Error analyzing export status for ${itemName} in ${filePath}`, error);
+            // Fail safe: assume it might be exported and used
+            return { isExported: true, isUsedInternally: true };
+        }
+    }
     async scan(workspace) {
         const items = [];
         let totalFiles = 0;
@@ -129,6 +152,36 @@ class RustAnalyzer {
                                             ? span.file_name
                                             : path.join(cwd, span.file_name);
                                         filesSet.add(absPath);
+                                        // Analyze export status
+                                        const itemName = span.text[0]?.text;
+                                        let isExported = false;
+                                        let isUsedInternally = false;
+                                        if (itemName) {
+                                            const status = await this.analyzeExportStatus(absPath, span.line_start, itemName);
+                                            isExported = status.isExported;
+                                            isUsedInternally =
+                                                status.isUsedInternally;
+                                        }
+                                        // Filter based on granular settings
+                                        // For imports, we generally treat them as "variables" or "functions" depending on context
+                                        // But unused imports are usually safe to remove regardless of export status
+                                        // However, if it's a `pub use`, it's an export.
+                                        // If it's exported and used internally, and we want to keep those:
+                                        const funcSettings = this.configManager.getFunctionCleaningSettings();
+                                        if (isExported &&
+                                            isUsedInternally &&
+                                            funcSettings.alwaysKeepExportedAndUsed) {
+                                            continue; // Skip this item
+                                        }
+                                        if (isExported &&
+                                            !isUsedInternally &&
+                                            !funcSettings.cleanExportedButUnused) {
+                                            continue; // Skip this item
+                                        }
+                                        if (!isExported &&
+                                            !funcSettings.cleanUnexported) {
+                                            continue; // Skip this item
+                                        }
                                         items.push({
                                             type: "unused-import",
                                             description: msg.message.message,
@@ -140,9 +193,11 @@ class RustAnalyzer {
                                             severity: "warning",
                                             confidence: "high",
                                             category: "dead-code",
-                                            codeSnippet: span.text[0]?.text,
+                                            codeSnippet: itemName,
                                             suggestion: "Remove unused import",
-                                            isGrayArea: false,
+                                            isGrayArea: isExported,
+                                            isExported,
+                                            isUsedInternally,
                                         });
                                     }
                                 }
