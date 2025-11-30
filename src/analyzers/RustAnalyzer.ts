@@ -316,10 +316,36 @@ export class RustAnalyzer implements IAnalyzer {
                         );
                         const fullText = document.getText(lineRange);
 
-                        // Check if it's a multi-import (contains '{')
-                        // This is a heuristic, but usually sufficient for 'use' statements
-                        if (fullText.includes("{")) {
-                            // Smart deletion for multi-imports
+                        // Check if there is other code on the same line
+                        // This handles cases like: use foo::{Bar, Baz}; where Baz is unused
+                        // or multi-line:
+                        // use foo::{
+                        //    Bar, Baz
+                        // };
+
+                        const lineText = document.lineAt(startLine).text;
+                        const textBefore = lineText
+                            .substring(0, startCol)
+                            .trim();
+                        const textAfter = lineText.substring(endCol).trim();
+
+                        // If there is meaningful code before or after, we must NOT delete the whole line
+                        // We treat '{' as meaningful code if it's on the same line
+                        const hasCodeBefore =
+                            textBefore.length > 0 && textBefore !== "{";
+                        const hasCodeAfter =
+                            textAfter.length > 0 &&
+                            textAfter !== "," &&
+                            textAfter !== "}";
+
+                        // Special case: if the line is just "    UserId," or "    UserId" -> Delete whole line
+                        // But if it is "    AuthenticatedUser, UserId," -> Only delete UserId
+
+                        const isAloneOnLine =
+                            !hasCodeBefore && (!textAfter || textAfter === ",");
+
+                        if (!isAloneOnLine || fullText.includes("{")) {
+                            // Smart deletion for partial items
                             let deleteRange = new vscode.Range(
                                 new vscode.Position(startLine, startCol),
                                 new vscode.Position(endLine, endCol)
@@ -407,12 +433,6 @@ export class RustAnalyzer implements IAnalyzer {
 
                             edit.delete(vscode.Uri.file(filePath), deleteRange);
                         } else {
-                            // Single import, safe to delete the line(s)
-                            // But let's be precise: delete the statement
-                            // If the span covers the whole line, delete the line
-                            // If it's just 'use crate::Foo', we want to delete 'use crate::Foo;'
-
-                            // For now, reverting to line deletion for single imports as it's safer
                             // than leaving 'use ;' artifacts, and usually correct for single imports.
                             const range = new vscode.Range(
                                 new vscode.Position(startLine, 0),
