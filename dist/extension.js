@@ -212,7 +212,11 @@ async function createBackupCommit() {
     }
     const timestamp = new Date().toISOString();
     const commitMessage = `[Auto Cleaner Backup] Before cleaning - ${timestamp}`;
-    return await gitManager.commitChanges(cwd, commitMessage);
+    const success = await gitManager.commitChanges(cwd, commitMessage);
+    if (success && configurationManager.isGitPushEnabled()) {
+        await gitManager.pushChanges(cwd);
+    }
+    return success;
 }
 function deactivate() {
     if (scanInterval) {

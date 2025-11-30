@@ -418,6 +418,8 @@ class ReportPanel {
         
         function renderAnalyzerSection(analyzer, items) {
             const analyzerName = analyzer.charAt(0).toUpperCase() + analyzer.slice(1);
+            const allSelected = items.every(item => selectedItems.has(item.id));
+            
             return \`
                 <div class="analyzer-section" data-analyzer="\${analyzer}">
                     <div class="analyzer-header" data-action="toggle-section" data-target="\${analyzer}">
@@ -428,7 +430,7 @@ class ReportPanel {
                         <table>
                             <thead>
                                 <tr>
-                                    <th width="40"><input type="checkbox" class="analyzer-checkbox" data-analyzer="\${analyzer}"></th>
+                                    <th width="40"><input type="checkbox" class="analyzer-checkbox" data-analyzer="\${analyzer}" \${allSelected ? 'checked' : ''}></th>
                                     <th width="150">Type</th>
                                     <th>File</th>
                                     <th width="60">Line</th>

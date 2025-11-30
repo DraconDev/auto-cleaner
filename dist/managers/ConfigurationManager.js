@@ -81,6 +81,9 @@ class ConfigurationManager {
     isGitCommitEnabled() {
         return this.getConfiguration().get("createGitCommit", true);
     }
+    isGitPushEnabled() {
+        return this.getConfiguration().get("pushGitCommit", false);
+    }
     isDryRun() {
         return this.getConfiguration().get("dryRun", true);
     }

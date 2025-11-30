@@ -14,6 +14,7 @@ export declare class ConfigurationManager {
     getAnalyzerSetting<T>(analyzerName: string, setting: string, defaultValue: T): T;
     getGrayAreaHandling(): "ignore" | "warn" | "remove";
     isGitCommitEnabled(): boolean;
+    isGitPushEnabled(): boolean;
     isDryRun(): boolean;
     getTargetDirectories(): string[];
     getExcludePatterns(): string[];
