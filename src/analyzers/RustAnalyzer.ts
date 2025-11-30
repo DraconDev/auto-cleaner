@@ -316,6 +316,26 @@ export class RustAnalyzer implements IAnalyzer {
                         );
                         const fullText = document.getText(lineRange);
 
+                        // Get the full line text to check for use statement
+                        const lineText = document.lineAt(startLine).text;
+
+                        // Check if this is a simple "use X;" statement (not multi-import)
+                        // Pattern: optional whitespace, "use", whitespace, import path, optional whitespace, ";"
+                        const simpleUsePattern = /^\s*use\s+[^{]+;\s*$/;
+                        const isSimpleUseStatement =
+                            simpleUsePattern.test(lineText) &&
+                            !lineText.includes("{");
+
+                        // If it's a simple use statement, delete the whole line
+                        if (isSimpleUseStatement) {
+                            const range = new vscode.Range(
+                                new vscode.Position(startLine, 0),
+                                new vscode.Position(endLine + 1, 0)
+                            );
+                            edit.delete(vscode.Uri.file(filePath), range);
+                            continue; // Skip to next item
+                        }
+
                         // Check if there is other code on the same line
                         // This handles cases like: use foo::{Bar, Baz}; where Baz is unused
                         // or multi-line:

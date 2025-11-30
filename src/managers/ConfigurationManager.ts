@@ -203,19 +203,25 @@ export class ConfigurationManager {
      * Supports: asterisk, double-asterisk-slash, exact matches
      */
     private matchesPattern(filePath: string, pattern: string): boolean {
+        // Normalize paths to forward slashes for consistent matching
+        const normalizedPath = filePath.replace(/\\/g, "/");
+        const normalizedPattern = pattern.replace(/\\/g, "/");
+
         // Exact match
-        if (filePath === pattern) {
+        if (normalizedPath === normalizedPattern) {
             return true;
         }
 
         // Convert glob pattern to regex
-        const regexPattern = pattern
+        // Must handle ** before * to avoid incorrect replacements
+        const regexPattern = normalizedPattern
             .replace(/\./g, "\\.") // Escape dots
-            .replace(/\*\*/g, ".*") // ** matches any characters
-            .replace(/\*/g, "[^/\\\\]*"); // * matches anything except path separators
+            .replace(/\*\*/g, "<<<DOUBLESTAR>>>") // Temporarily replace **
+            .replace(/\*/g, "[^/]*") // * matches anything except path separators
+            .replace(/<<<DOUBLESTAR>>>/g, ".*"); // ** matches any characters including /
 
         const regex = new RegExp(`^${regexPattern}$`);
-        return regex.test(filePath) || regex.test(filePath.replace(/\\/g, "/"));
+        return regex.test(normalizedPath);
     }
 
     // CSS-specific settings (now under analyzers.css)
