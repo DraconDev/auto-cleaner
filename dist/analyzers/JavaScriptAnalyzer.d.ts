@@ -12,6 +12,7 @@ export declare class JavaScriptAnalyzer implements IAnalyzer {
     scan(workspace: vscode.WorkspaceFolder): Promise<AnalysisResult>;
     clean(items: CleanableItem[]): Promise<CleanResult>;
     private runCommand;
+    private analyzeExportStatus;
     private parseESLintOutput;
 }
 //# sourceMappingURL=JavaScriptAnalyzer.d.ts.map

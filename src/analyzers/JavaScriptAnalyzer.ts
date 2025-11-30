@@ -1,4 +1,5 @@
 import * as cp from "child_process";
+import * as fs from "fs-extra";
 import * as vscode from "vscode";
 import {
     AnalysisResult,
@@ -45,15 +46,17 @@ export class JavaScriptAnalyzer implements IAnalyzer {
             // --format compact for easier parsing
             const command = `npx eslint --rule 'no-unused-vars: 2' --format compact ${workspace.uri.fsPath}/**/*.{js,jsx,mjs}`;
             const output = await this.runCommand(command, workspace.uri.fsPath);
-            items.push(...this.parseESLintOutput(output, workspace.uri.fsPath));
+            items.push(
+                ...(await this.parseESLintOutput(output, workspace.uri.fsPath))
+            );
         } catch (error) {
             console.error("JavaScriptAnalyzer scan failed:", error);
             if (error instanceof Error && (error as any).stdout) {
                 items.push(
-                    ...this.parseESLintOutput(
+                    ...(await this.parseESLintOutput(
                         (error as any).stdout,
                         workspace.uri.fsPath
-                    )
+                    ))
                 );
             }
         }

@@ -25,6 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JavaScriptAnalyzer = void 0;
 const cp = __importStar(require("child_process"));
+const fs = __importStar(require("fs-extra"));
 const vscode = __importStar(require("vscode"));
 class JavaScriptAnalyzer {
     constructor(configManager) {
@@ -59,12 +60,12 @@ class JavaScriptAnalyzer {
             // --format compact for easier parsing
             const command = `npx eslint --rule 'no-unused-vars: 2' --format compact ${workspace.uri.fsPath}/**/*.{js,jsx,mjs}`;
             const output = await this.runCommand(command, workspace.uri.fsPath);
-            items.push(...this.parseESLintOutput(output, workspace.uri.fsPath));
+            items.push(...(await this.parseESLintOutput(output, workspace.uri.fsPath)));
         }
         catch (error) {
             console.error("JavaScriptAnalyzer scan failed:", error);
             if (error instanceof Error && error.stdout) {
-                items.push(...this.parseESLintOutput(error.stdout, workspace.uri.fsPath));
+                items.push(...(await this.parseESLintOutput(error.stdout, workspace.uri.fsPath)));
             }
         }
         // Calculate summary
@@ -155,7 +156,28 @@ class JavaScriptAnalyzer {
             });
         });
     }
-    parseESLintOutput(output, workspacePath) {
+    async analyzeExportStatus(filePath, line, itemName) {
+        try {
+            const content = await fs.readFile(filePath, "utf-8");
+            const lines = content.split("\n");
+            const itemLine = lines[line - 1] || "";
+            // Check for 'export' keyword or module.exports
+            // Matches: export const, export function, export default, module.exports, exports.foo
+            const isExported = /\bexport\s+(const|function|class|default|var|let)\s+/.test(itemLine) ||
+                /\b(module\.)?exports\s*(\.|\[|=)/.test(itemLine) ||
+                /\bexport\s*{\s*\w+/.test(content);
+            // Check internal usage (simple grep for the item name)
+            // We count occurrences. Definition is 1. Usage > 1.
+            const occurrences = content.split(itemName).length - 1;
+            const isUsedInternally = occurrences > 1;
+            return { isExported, isUsedInternally };
+        }
+        catch (error) {
+            console.error(`Error analyzing export status for ${itemName} in ${filePath}:`, error);
+            return { isExported: true, isUsedInternally: true };
+        }
+    }
+    async parseESLintOutput(output, workspacePath) {
         const items = [];
         const lines = output.split("\n");
         // ESLint compact format: filepath: line:column, message - rule
@@ -172,6 +194,34 @@ class JavaScriptAnalyzer {
                     if (message.includes("import")) {
                         type = "unused-import";
                     }
+                    // Extract item name from message
+                    // Message format: "'foo' is defined but never used."
+                    const nameMatch = message.match(/'([^']+)'/);
+                    const itemName = nameMatch ? nameMatch[1] : "";
+                    let isExported = false;
+                    let isUsedInternally = false;
+                    if (itemName) {
+                        const status = await this.analyzeExportStatus(filePath, lineNum, itemName);
+                        isExported = status.isExported;
+                        isUsedInternally = status.isUsedInternally;
+                    }
+                    // Filter based on granular settings
+                    if (type === "unused-variable") {
+                        const settings = this.configManager.getVariableCleaningSettings();
+                        if (isExported &&
+                            isUsedInternally &&
+                            settings.alwaysKeepExportedAndUsed) {
+                            continue;
+                        }
+                        if (isExported &&
+                            !isUsedInternally &&
+                            !settings.cleanExportedButUnused) {
+                            continue;
+                        }
+                        if (!isExported && !settings.cleanUnexported) {
+                            continue;
+                        }
+                    }
                     items.push({
                         type,
                         file: filePath,
@@ -181,7 +231,9 @@ class JavaScriptAnalyzer {
                         severity: severity.toLowerCase(),
                         confidence: "high",
                         category: "dead-code",
-                        isGrayArea: false,
+                        isGrayArea: isExported,
+                        isExported,
+                        isUsedInternally,
                     });
                 }
             }
