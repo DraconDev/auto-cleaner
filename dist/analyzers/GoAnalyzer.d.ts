@@ -14,6 +14,7 @@ export declare class GoAnalyzer implements IAnalyzer {
     constructor(configManager: any);
     isEnabled(): boolean;
     scan(workspace: vscode.WorkspaceFolder): Promise<AnalysisResult>;
+    private analyzeExportStatus;
     private parseGoErrors;
     private parseGoVetWarnings;
     clean(items: CleanableItem[]): Promise<CleanResult>;

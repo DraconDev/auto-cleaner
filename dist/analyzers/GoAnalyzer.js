@@ -25,6 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GoAnalyzer = void 0;
 const child_process_1 = require("child_process");
+const fs = __importStar(require("fs-extra"));
 const path = __importStar(require("path"));
 const util_1 = require("util");
 const vscode = __importStar(require("vscode"));
@@ -83,7 +84,7 @@ class GoAnalyzer {
                 // go build exits with error on unused imports/variables
                 // We parse the error output for unused items
                 const output = error.stderr || error.stdout || "";
-                this.parseGoErrors(output, items);
+                await this.parseGoErrors(output, items);
             }
             // Also run go vet for additional analysis
             try {
@@ -120,7 +121,27 @@ class GoAnalyzer {
             items,
         };
     }
-    parseGoErrors(output, items) {
+    async analyzeExportStatus(filePath, line, itemName) {
+        try {
+            // In Go, capitalized names are exported
+            const isExported = /^[A-Z]/.test(itemName);
+            // Check internal usage
+            const content = await fs.readFile(filePath, "utf-8");
+            // We count occurrences. Definition is 1. Usage > 1.
+            const occurrences = content.split(itemName).length - 1;
+            const isUsedInternally = occurrences > 1;
+            return { isExported, isUsedInternally };
+        }
+        catch (error) {
+            console.error(`Error analyzing export status for ${itemName} in ${filePath}:`, error);
+            // Fail safe
+            return {
+                isExported: /^[A-Z]/.test(itemName),
+                isUsedInternally: true,
+            };
+        }
+    }
+    async parseGoErrors(output, items) {
         const lines = output.split("\n");
         for (const line of lines) {
             // Pattern: ./main.go:3:2: imported and not used: "fmt"
@@ -143,17 +164,39 @@ class GoAnalyzer {
             // Pattern: ./main.go:7:2: unusedVar declared and not used
             const varMatch = line.match(/^(.+\.go):(\d+):(\d+):\s+(\w+)\s+declared and not used/);
             if (varMatch) {
+                const itemName = varMatch[4];
+                const file = varMatch[1];
+                const lineNum = parseInt(varMatch[2]);
+                const status = await this.analyzeExportStatus(file, lineNum, itemName);
+                const { isExported, isUsedInternally } = status;
+                // Filter based on granular settings
+                const settings = this.configManager.getVariableCleaningSettings();
+                if (isExported &&
+                    isUsedInternally &&
+                    settings.alwaysKeepExportedAndUsed) {
+                    continue;
+                }
+                if (isExported &&
+                    !isUsedInternally &&
+                    !settings.cleanExportedButUnused) {
+                    continue;
+                }
+                if (!isExported && !settings.cleanUnexported) {
+                    continue;
+                }
                 items.push({
                     type: "unused-variable",
-                    description: `${varMatch[4]} declared and not used`,
-                    file: varMatch[1],
-                    line: parseInt(varMatch[2]),
+                    description: `${itemName} declared and not used`,
+                    file: file,
+                    line: lineNum,
                     column: parseInt(varMatch[3]),
                     severity: "error",
                     confidence: "high",
                     category: "dead-code",
                     suggestion: "Remove or use variable, or prefix with _",
-                    isGrayArea: false,
+                    isGrayArea: isExported,
+                    isExported,
+                    isUsedInternally,
                 });
             }
         }
