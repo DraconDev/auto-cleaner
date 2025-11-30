@@ -113,7 +113,8 @@ class RustAnalyzer {
                         try {
                             const msg = JSON.parse(line);
                             // Filter for compiler warnings
-                            if (msg.message && msg.level === "warning") {
+                            if (msg.message &&
+                                msg.message.level === "warning") {
                                 warningCount++;
                                 const code = msg.message.code?.code;
                                 if (code) {

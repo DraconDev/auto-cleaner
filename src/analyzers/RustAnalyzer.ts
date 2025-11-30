@@ -32,59 +32,6 @@ interface RustWarning {
     };
 }
 
-// ...
-
-for (const line of lines) {
-    if (!line.trim()) continue;
-
-    try {
-        const msg = JSON.parse(line) as RustWarning;
-
-        // Filter for compiler messages
-        if (msg.reason === "compiler-message" && msg.message) {
-            // Check level inside message object
-            if (msg.message.level === "warning") {
-                warningCount++;
-                const code = msg.message.code?.code;
-                if (code) {
-                    warningCodes.add(code);
-                }
-
-                // Focus on unused imports
-                if (code === "unused_imports") {
-                    unusedImportCount++;
-                    const span = msg.message.spans.find((s) => s.is_primary);
-                    if (span) {
-                        const absPath = path.isAbsolute(span.file_name)
-                            ? span.file_name
-                            : path.join(cwd, span.file_name);
-
-                        filesSet.add(absPath);
-                        items.push({
-                            type: "unused-import",
-                            description: msg.message.message,
-                            file: absPath,
-                            line: span.line_start,
-                            column: span.column_start,
-                            endLine: span.line_end,
-                            endColumn: span.column_end,
-                            severity: "warning",
-                            confidence: "high",
-                            category: "dead-code",
-                            codeSnippet: span.text[0]?.text,
-                            suggestion: "Remove unused import",
-                            isGrayArea: false,
-                        });
-                    }
-                }
-            }
-        }
-    } catch (parseError) {
-        // Skip non-JSON lines
-        continue;
-    }
-}
-
 /**
  * Analyzer for Rust projects
  * Detects unused imports by parsing cargo build warnings
