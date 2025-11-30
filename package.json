@@ -3,7 +3,7 @@
   "displayName": "Auto Cleaner",
   "description": "Automatically cleans unused code across multiple languages (Rust, Go, CSS, TypeScript, and more)",
   "icon": "thumb.png",
-  "version": "2.7.6",
+  "version": "2.7.7",
   "publisher": "devdrac",
   "engines": {
     "vscode": "^1.74.0"

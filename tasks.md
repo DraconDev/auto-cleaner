@@ -2,7 +2,7 @@
 
 - btw there would be good to have a deeper breakdown in general settings so function like what kind?  unexported, exported but unused? export and used is a safe keep for sure, similar can be said for variables
 - we should not only git commit but push before cleaning
-- we need to update the 
+- we need to update the clean commands they are still from the time we only did css
 
 # Done 
 
