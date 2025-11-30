@@ -1,4 +1,3 @@
-```typescript
 import { exec } from "child_process";
 import * as fs from "fs-extra";
 import * as path from "path";
