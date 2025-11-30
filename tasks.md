@@ -1,9 +1,10 @@
 # Do
 
 -   btw there would be good to have a deeper breakdown in general settings so function like what kind? unexported, exported but unused? export and used is a safe keep for sure, similar can be said for variables
+  -   this is in the general setting we should have a way to select which kind of function to keep
 -   then i right click on the status bar many options still only talk of css, which reflects the old version
--   use ;
-    -   when we have only one on the line we should remove the line
+-   use ; bug
+    -   when we have only one import on the line we should remove the line
 
 # Done
 
